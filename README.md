@@ -96,7 +96,7 @@ This will update each record in the $locations collection with associated events
 # Airpress Collections and Records
 There are two reasons why AirpressCollections should be used even when dealing with just a single AirpressRecord.
 1. All Airtable linked fields are arrays, regardless of it you uncheck 'Allow Linking to Multiple Records'. And until the Airtable Metadata API is available there's no way to know if your linked record *might* contain more than one record. 
-2. Airpress allows you to automatically (or manually) retrieve one or more Airtable records.
+2. Airpress allows you to automatically (or manually) retrieve one or more Airtable records. And when you're dealing with populating related fields for *multiple* records, Airpress intelligently aggregates ALL the RECORD_ID()s for the same field in all the records, making a single API request, then "collates" the resulting records back into the appropriate "parent" record. Essentially, Airpress does **_everything_** it can do to minimize the number of API requests.
 
 Both AirpressCollection() and AirpressRecord() are PHP [ArrayObjects](http://php.net/manual/en/class.arrayobject.php). This means that they behave like arrays even though they can store custom properties and methods as well.
 
