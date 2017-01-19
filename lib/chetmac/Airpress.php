@@ -22,13 +22,21 @@ class Airpress {
 		$this->virtualPosts = new AirpressVirtualPosts();
 		$this->virtualPosts->init();
 
-		add_shortcode( 'airblock', array($this, 'shortcode_airblock'));
-		add_shortcode( 'airfield', array($this,'shortcode_airfield') );
-		add_shortcode( 'airfield_loop', array($this,'shortcode_loop') );
-		for($i=1;$i<=10;$i++){
-			add_shortcode( 'airfield_loop'.$i, array($this,'shortcode_loop') );
+		// Populate related field with related records from another table
+		add_shortcode( 'apr_populate', array($this,'shortcode_populate') );
+
+		// Display contents of field
+		add_shortcode( 'apr', array($this,'shortcode_display') );
+
+		// Include PHP file
+		add_shortcode( 'apr_include', array($this, 'shortcode_include'));
+
+		// Loop through collection or array
+		add_shortcode( 'apr_loop', array($this,'shortcode_loop') );
+		for($i=0;$i<=10;$i++){
+			add_shortcode( 'apr_loop'.$i, array($this,'shortcode_loop') );
 		}
-		add_shortcode( 'airpress_populate', array($this,'shortcode_populate') );
+
 		add_action( 'wp_footer', array($this,'renderDebugOutput') );
 		add_action( 'admin_bar_menu', array($this,'renderDebugToggle'), 999 );
 		add_action( 'shutdown', array($this,'stash_and_trigger_deferred_queries'));
@@ -72,6 +80,7 @@ class Airpress {
 	    	// By doing the shortcodes BEFORE any processing, we're ensuring that
 	    	// any nested loops ... or innermost loops are processed prior to outter most loops.
 	    	// if we don't do this all {{variables}} will be replaced by outter most loops.
+	    	airpress_debug(0,$content);
 	    	$template = do_shortcode($content);
 
 	    	foreach($replacementFields as $replacementField){
@@ -81,7 +90,11 @@ class Airpress {
 				$replacementValue = "";
 				
 				if ( strtolower($field) == "record_id" ){
-					$replacementValue = $record->record_id();
+					if ( is_airpress_record($record)){
+						$replacementValue = $record->record_id();
+					} else {
+						airpress_debug(0,"Attempting to populate field $field on a non-populated record",$keys);
+					}
 				} else if ( ! is_airpress_empty( $record[$field] ) ){ 
 					// this means it IS an AirpressCollection with records
 
@@ -191,20 +204,20 @@ class Airpress {
 
 	}
 
-	public function shortcode_airblock($atts, $content=null, $tag){
+	public function shortcode_include($atts, $content=null, $tag){
 		global $post,$model;
 
 	    $a = shortcode_atts( array(
-	        'name' => null,
+	        'path' => null,
 	        'value' => null,
 			'title' => null
 	    ), $atts );
 
-	    $a["name"] = ltrim($a["name"], '/');
+	    $a["path"] = ltrim($a["path"], '/');
 
-	    $filepath = apply_filters("airpress_airblock_path_pre",$a["name"]);
-	    $filepath = get_stylesheet_directory()."/".$a["name"].".php";
-	    $filepath = apply_filters("airpress_airblock_path",$filepath);
+	    $filepath = apply_filters("airpress_include_path_pre",$a["path"]);
+	    $filepath = get_stylesheet_directory()."/".$a["path"].".php";
+	    $filepath = apply_filters("airpress_include_path",$filepath);
 
 	    if (is_file($filepath)){
 	    	ob_start();
@@ -216,7 +229,7 @@ class Airpress {
 	    }
 	}
 
-	public function shortcode_airfield($atts, $content=null, $tag){
+	public function shortcode_display($atts, $content=null, $tag){
 		global $post;
 
 		// Check for non-value "flag" attributes. Set to true
@@ -230,7 +243,7 @@ class Airpress {
 		}
 
 	    $a = shortcode_atts( array(
-	        'name'				=> null,
+	        'field'				=> null,
 			'relatedto'			=> null,
 			'recordtemplate'	=> null,
 			'relatedtemplate'	=> null,
@@ -238,9 +251,10 @@ class Airpress {
 			'rollup'			=> null,
 			'default'			=> null,
 			'format'			=> null,
+			'glue'				=> null,
 	    ), $atts );
 
-	    $field_name = $a["name"];
+	    $field_name = $a["field"];
 
 	    $single = (!isset($a["single"]) || strtolower($a["single"]) == "false")? false : true;
 
@@ -248,7 +262,7 @@ class Airpress {
 		$relatedTemplate = (isset($a["relatedtemplate"]))? $a["relatedtemplate"] : "%s\n";
 
 
-   		$keys = explode("|", $a["name"]);
+   		$keys = explode("|", $a["field"]);
 
 		$collection = $post->AirpressCollection;
 
@@ -265,8 +279,8 @@ class Airpress {
 
 				$f = explode("|", $a["format"]);
 				foreach($values as &$value):
-					if ( has_filter("airfield_filter_".$f[0])){
-						$value = apply_filters("airfield_filter_".$f[0],$value,$a["format"]);
+					if ( has_filter("airpress_shortcode_filter_".$f[0])){
+						$value = apply_filters("airpress_shortcode_filter_".$f[0],$value,$f[1]);
 					} else {
 						switch ($f[0]){
 							case "date":
@@ -279,7 +293,12 @@ class Airpress {
 				unset($value);
 			}
 
-			$output = implode("\n", $values);			
+			if (isset($a["glue"])){
+				$output = implode($a["glue"], $values);
+			} else {
+				$output = implode(", ", $values);
+			}
+
 		}
 
 		// $output = "";
@@ -297,7 +316,7 @@ class Airpress {
 
 		// }
 
-		return apply_filters( 'airpress_airfield', $output, $atts, $content, $tag );
+		return apply_filters( 'airpress_shortcode_filter', $output, $atts, $content, $tag );
 
 	}
 

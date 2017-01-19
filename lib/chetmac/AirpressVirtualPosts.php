@@ -121,7 +121,7 @@ class AirpressVirtualPosts {
 			$request = new StdClass();
 			$request->request = str_replace($remove,"",get_permalink($post->ID));
 			
-			$request = apply_filters("airpress_last_chance",$request);
+			$request = apply_filters("airpress_virtualpost_last_chance",$request);
 
 
 			$configs = get_airpress_configs("airpress_vp");
@@ -175,7 +175,7 @@ class AirpressVirtualPosts {
 
 		$post->AirpressCollection = $this->AirpressCollection;
 
-		do_action("airpress_setup_virtual_post",$this->config);
+		do_action("airpress_virtualpost_setup",$this->config);
 	}
 
 	function force_404(){
