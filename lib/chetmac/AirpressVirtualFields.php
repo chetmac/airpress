@@ -13,70 +13,70 @@ I lean toward allowing collection
 
 class AirpressVirtualFields{
 
-	private $configs;
+	function init(){
 
-	function __construct(){
+		$configs = get_airpress_configs("airpress_vf");
 
-		$this->configs = array();
-
-    	add_filter('template_redirect', array($this,"run"), 1);
-
-    	// TODO: add an option for updating actual post meta/custom fields on post save/update
-    	// then look here to impliment: https://codex.wordpress.org/Plugin_API/Action_Reference/save_post
-
-	}
-
-	function register($config){
-		if ( !isset($config["api_key"]) && !isset($config["app_id"]) )
-			return false;
-
-		if (
-			isset($config["posttype_types"]) &&
-			isset($config["posttype_wpfield"]) &&
-			isset($config["posttype_table"]) &&
-			isset($config["posttype_field"])
-		){
-			$this->configs[] = $config;
+		if ( ! empty($configs) ){
+    		add_filter('template_redirect', array($this,"airtable_lookup"), 1);
 		}
+
 	}
 
-	function run(){
+	function airtable_lookup(){
 		global $wp_query, $airpress;
 
-		foreach($this->configs as $config):
+		$configs = get_airpress_configs("airpress_vf");
 
-			if (count($wp_query->posts) > 1 && $config["posttype_single"] == true){
+		foreach($configs as $config):
+
+			if (count($wp_query->posts) > 1 && isset($config["single"]) && $config["single"] == 1 ){
 				// Config specified we only wanted data on singles, not multiple posts
 				return;
 			}
 
-			$airtable_field = $config["posttype_field"];
-			$airtable_table = $config["posttype_table"];
-			$wordpress_field = $config["posttype_wpfield"];
+			$airtable_field = $config["column"];
+			$airtable_table = $config["table"];
+			$wordpress_field = $config["field"];
 
 			$filterByFormula = array();
 
-			$airpress->debug("VirtualFields - Using \$post->$wordpress_field from ".count($wp_query->posts)." posts to find matching Airtable records from table ".$airtable_table."->".$airtable_field);
+			//airpress_debug(0,"Looking through ".count($wp_query->posts)." posts in wp_query");
 
 			// Loop through posts to build filter for Airtable request
 			foreach($wp_query->posts as $post){
-								
-				if (in_array($post->post_type,$config["posttype_types"])){
-					$wordpress_value = $post->$wordpress_field;
 
-					// wrap string in quotes, otherwise leave it.
-					// this could also be where Post Date is transformed so that 
-					// airtable records could be queried by matching dates
-					// this is also where ACF fields could be used/interpreted.
-					$wordpress_value = (is_string($wordpress_value))? '"'.$wordpress_value.'"' : $wordpress_value;
-
-					$filterByFormula[] = sprintf("{%s} = %s", $airtable_field, $wordpress_value);
-
+				if ( $post->post_type != $config["post_type"] ){
+					//airpress_debug(0,"Skipping ".$post->post_type ." because it is not a ".$config["post_type"]);
+					continue;
 				}
+
+				$wordpress_value = $post->$wordpress_field;
+
+				// wrap string in quotes, otherwise leave it.
+				// this could also be where Post Date is transformed so that 
+				// airtable records could be queried by matching dates
+				// this is also where ACF fields could be used/interpreted.
+				$wordpress_value = (is_string($wordpress_value))? '"'.$wordpress_value.'"' : $wordpress_value;
+				//airpress_debug(0,"Wordpress VALUE: $wordpress_value");
+
+				$formula = sprintf("{%s} = %s", $airtable_field, $wordpress_value);
+				$filterByFormula[] = $formula;
+
+				//airpress_debug(0,$post->post_type."	\$post->".$wordpress_field." is ".$wordpress_value.". Looking up matching records in table {$airtable_table} using formula: $formula");
 
 			}
 
-			$query = new AirpressQuery($config);
+			if ( empty($filterByFormula) ){
+				continue;
+			}
+
+			$connection = get_airpress_config("airpress_cx",$config["connection"]);
+
+			$query = new AirpressQuery();
+
+			$query->setConfig($connection);
+
 			$query->table($airtable_table)->filterByFormula($filterByFormula,"OR");
 
 			$records = AirpressConnect::get($query);
@@ -103,17 +103,19 @@ class AirpressVirtualFields{
 			foreach($wp_query->posts as $post){
 				$wordpress_value = $post->$wordpress_field;
 				if (isset($index[$wordpress_value])){
-					$airpress->debug("Populating wordpress post because ".$wordpress_field." (".$wordpress_value.") matches.");
+
 					// This creates a collection, but false means it WON'T attempt to populate
-					$post->AirpressCollection = new AirpressCollection($query,false);
-					
+					$post->AirpressCollection = new AirpressCollection(clone $query,false);
+									
+					// Now inject the records into this collection.
+					$post->AirpressCollection->setRecords($index[$wordpress_value]);
+
 					// Since the actual query (used above) used OR to target ALL posts, let's retroactively revise the query so we could
 					// theoretically run it again and get the expected results. This will become important later in caching scenarios
 					// where the initial request was for many posts, but the next request is for an individual post
+
+					$wordpress_value = (is_string($wordpress_value))? '"'.$wordpress_value.'"' : $wordpress_value;
 					$post->AirpressCollection->query->filterByFormula(sprintf("{%s} = %s", $airtable_field, $wordpress_value));
-					
-					// Now inject the records into this collection.
-					$post->AirpressCollection->setRecords($index[$wordpress_value]);
 
 				}
 			}

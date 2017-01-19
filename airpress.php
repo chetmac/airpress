@@ -87,6 +87,10 @@ function get_airpress_configs($option_group,$run_filter=true){
 		$id++;
 	}
 
+	if (count($configs) == 1 && $configs[0]["name"] == "New Configuration"){
+		$configs = array();
+	}
+
 	if ($run_filter){
 		$configs = apply_filters( 'airpress_configs', $configs, $option_group );
 	}

@@ -14,15 +14,26 @@ function airpress_vf_menu() {
 }
 add_action( 'admin_menu', 'airpress_vf_menu' );
 
+//add_action('rewrite_rules_array','airpress_vf_update_permalinks');
+//permalink_structure_changed
+//generate_rewrite_rules
+
 function airpress_vf_render( $active_tab = '' ) {
 	global $airpress;
+
+
+
+	if (isset($_GET['settings-updated'])){
+		global $wp_rewrite;
+		$wp_rewrite->flush_rules();
+	}
 ?>
 	<!-- Create a header in the default WordPress 'wrap' container -->
 	<div class="wrap">
 	
 		<div id="icon-themes" class="icon32"></div>
 		<h2><?php _e( 'Airpress Virtual Fields', 'airpress' ); ?></h2>
-		<p>Create as many configuration groups as you would like.</p>
+		<p>Managing custom fields for hundreds or thousands of posts can be tedious and daunting! Airpress Virtual Fields allow you to automatically retrieve Airtable records for each post/page/etc by specifying a Wordpress field (such as ID or post_name) and an Airtable table and field.</p>
 		<?php settings_errors(); ?>
 		
 		<?php
@@ -57,7 +68,6 @@ function airpress_vf_render( $active_tab = '' ) {
 }
 
 function airpress_admin_vf_tab_controller(){
-
 	if (isset($_GET["page"]) && $_GET["page"] != "airpress_vf"){
 		return;
 	}
@@ -96,7 +106,16 @@ function airpress_admin_vf_tab($key,$config) {
 	$option_name = "airpress_vf".$key;
 	//$options = get_option( $option_name );
 
-	$defaults = array();
+	$defaults = array(
+		"name"			=> "New Configuration",
+		"connection"	=> null,
+		"post_type"		=> null,
+		"table"			=> "Your Airtable Table",
+		"column"		=> "Your Airtable Column",
+		"field"			=> "Your Wordpress Field",
+		"single"		=> 0
+
+	);
 
 	$options = array_merge($defaults,$config);
 
@@ -124,7 +143,7 @@ function airpress_admin_vf_tab($key,$config) {
 
 	################################
 	################################
-	$section_title = "Auto Get Record by URL Regexp";
+	$section_title = "";
 	$section_name = "airpress_vf".$key;
 	$option_name = 'airpress_vf'.$key;
 
@@ -136,47 +155,40 @@ function airpress_admin_vf_tab($key,$config) {
 	);
 
 	################################
-	$field_name = "regexp_pattern";
-	$field_title = "URL Pattern to Match";
-	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+	$field_name = "post_type";
+	$field_title = "Select Post Type";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vf_render_element_select__posttypes', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################
-	$field_name = "regexp_formula";
-	$field_title = "Filter by formula";
-	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
-
-	################################
-	$field_name = "regexp_table";
+	$field_name = "table";
 	$field_title = "Airtable Table Name";
-	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
-
-	###############################
-	$field_name = "regexp_field";
-	$field_title = "Airtable Field to be used as post_name";
-	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vf_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################
-	$field_name = "regexp_template";
-	$field_title = "Map to this page";
-	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_render_element_select__page', $option_name, $section_name, array($options,$option_name,$field_name) );
+	$field_name = "column";
+	$field_title = "Airtable Column";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vf_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+
+	################################
+	$field_name = "field";
+	$field_title = "Wordpress Field (ID or post_name)";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vf_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+
+	################################
+	$field_name = "single";
+	$field_title = "Enable only for single posts (not archive, search, etc)";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vf_render_element_toggle', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	###############################
 	$field_name = "delete";
 	$field_title = "Delete Configuration?";
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vf_render_element_delete', $option_name, $section_name, array($options,$option_name,$field_name) );
 
-	################################
-	// $field_name = "regexp_single";
-	// $field_title = "Single Post Only";
-	// add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_render_element_toggle', $option_name, $section_name, array($options,$option_name,$field_name) );
-
 	register_setting($option_name,$option_name,"airpress_vf_validation");
 }
 
-function airpress_vf_validation($input){
-	global $wp_rewrite;
-	$wp_rewrite->flush_rules();
-	return $input;
+function airpress_vf_validation($config){
+	return $config;
 }
 
 function airpress_admin_vf_render_section__general() {
@@ -184,7 +196,7 @@ function airpress_admin_vf_render_section__general() {
 }
 
 function airpress_admin_vf_render_section() {
-	echo '<p>' . __( 'Airpress settings for this particular post type.', 'airpress' ) . '</p>';
+	echo '<p>' . __( '', 'airpress' ) . '</p>';
 }
 
 function airpress_admin_vf_render_element_text($args) {
@@ -210,11 +222,11 @@ function airpress_admin_vf_render_element_select__posttypes($args) {
 	$option_name = $args[1];
 	$field_name = $args[2];
 
-	$post_types = airpress_get_posttypes_available();
+	$post_types = get_post_types( array( 'public'   => true) );
 
-	echo '<select id="' . $field_name . '" name="' . $option_name . '[' . $field_name . '][]" multiple>';
+	echo '<select id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']">';
 	foreach ( $post_types  as $post_type ) {
-		$selected = (in_array($post_type, $options[$field_name]))? "selected" : "";
+		$selected = ( $post_type == $options[$field_name] )? "selected" : "";
 		echo '<option value="'.$post_type.'" '.$selected.'>'.$post_type.'</option>';
 	}
 	echo '</select>';
@@ -229,7 +241,7 @@ function airpress_admin_vf_render_element_select_connections($args) {
 
 	echo '<select id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']">';
 	foreach ( $connections  as $connection ) {
-		$selected = ( $connection["name"] == $options[$field_name] )? "selected" : "";
+		$selected = ($connection["name"] == $options[$field_name])? "selected" : "";
 		echo '<option value="'.$connection["name"].'" '.$selected.'>'.$connection["name"].'</option>';
 	}
 	echo '</select>';
@@ -262,5 +274,6 @@ function airpress_admin_vf_render_element_delete($args) {
 	$tab = (int)$_GET["tab"];
 	echo "<a href='?page=airpress_vf&tab=$tab&delete=true'>Yes, delete this configuration</a>";
 }
+
 
 ?>

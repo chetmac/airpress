@@ -144,7 +144,7 @@ class AirpressQuery {
 			if ( $age < $this->config["refresh"] ){
 				airpress_debug(0,"Cached Query ".$this->hash()." needs refreshing in ".($this->config["refresh"] - $age) );
 			} else {
-				airpress_debug($this->config["id"],"DELAYED QUERY : /".$this->getTable()." : ".$this->hash());
+				airpress_debug($this->config["id"],"DELAYED QUERY : /".$this->getTable()." : ".$this->hash()."	".$this->toString());
 				$airpress->defer_query($this);
 			}
 			return $storage["records"];
@@ -156,9 +156,25 @@ class AirpressQuery {
 
 	public function toString(){
 		$params = $this->parameters;
-		$count_ids = substr_count($params["filterByFormula"], "RECORD_ID()");
-		$params["filterByFormula"] = str_replace("RECORD_ID()","",$params["filterByFormula"]);
-		$params["filterByFormula"] = preg_replace("/OR\([^)]+\)/","OR( ...one of ".$count_ids." ids... )",$params["filterByFormula"]);
+
+		/*
+		This little beauty turns: AND(OR(RECORD_ID()='recXXX', RECORD_ID()='recXXX'),OR(RECORD_ID()='recXXX', RECORD_ID()='recXXX'))
+		into this: AND(OR(...one of 2 ids...),OR(...one of 2 ids...))
+		This is very helpful for debugging output as RECORD IDS aren't exactly human readable anyway
+		but we need to know how many we're dealing with. This little two hour exercise taught me that
+		you can have SUB-FREAKING-GROUPS in regular expressions... sigh... had I only known.
+		*/
+
+		$pattern = "/OR\((RECORD_ID\(\)='([^']+)',?\s?)+\)/";
+		if ( preg_match_all($pattern, $params["filterByFormula"],$matches) ){
+			foreach($matches[0] as $matched_string){
+				// count how many we replace
+				$pattern = "/RECORD_ID\(\)='([^']+)',?\s?/";
+				preg_match_all($pattern, $matched_string, $matches);
+				$params["filterByFormula"] = str_replace($matched_string, "OR(...one of ".count($matches[0])." ids...)", $params["filterByFormula"]);
+			}
+		}
+
 		return $this->properties["table"]."?".urldecode(http_build_query($params));
 	}
 

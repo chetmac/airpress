@@ -208,7 +208,10 @@ class AirpressCollection extends ArrayObject {
 		}
 
 		foreach($this as $record){
-			if (isset($record[$field])){
+			//airpress_debug(0,"field: $field");
+			if (strtolower($field) == "record_id"){
+				$values[] = $record->record_id();
+			} else if (isset($record[$field])){
 
 				// Is this field a collection? i
 				if (is_object($record[$field]) && get_class($record[$field]) == "AirpressCollection"){

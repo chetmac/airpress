@@ -147,4 +147,6 @@ Airpress plays nicely with object caches and page caches. Please note that some 
 2. Keep improving readme/documentation
 3. Check logfile permissions before attempting to write
 4. Find other developers to help improve code!
+5. Create Extensions for maps
+6. Create Extensions for slackbots
   

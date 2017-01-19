@@ -37,6 +37,10 @@ class AirpressVirtualPosts {
 
 			$configs = get_airpress_configs("airpress_vp");
 
+			if ( count($configs) == 0){
+				return $request;
+			}
+
 			// figure out which config to use
 			foreach($configs as $config){
 				if ($request->matched_rule == $config["pattern"]){

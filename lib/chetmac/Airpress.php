@@ -17,6 +17,7 @@ class Airpress {
 		$this->deferredQueries = array();
 
 		$this->virtualFields = new AirpressVirtualFields();
+		$this->virtualFields->init();
 
 		$this->virtualPosts = new AirpressVirtualPosts();
 		$this->virtualPosts->init();
@@ -78,8 +79,11 @@ class Airpress {
 	    		$keys = explode("|", $replacementField);
 	    		$field = array_shift($keys);
 				$replacementValue = "";
-			
-				if (is_object($record[$field]) && get_class($record[$field]) == "AirpressCollection"){
+				
+				if ( strtolower($field) == "record_id" ){
+					$replacementValue = $record->record_id();
+				} else if ( ! is_airpress_empty( $record[$field] ) ){ 
+					// this means it IS an AirpressCollection with records
 
 	    			if (empty($keys)){
 	    				// this shouldn't really happen because we can't output a collection
@@ -156,7 +160,7 @@ class Airpress {
 	    if (isset($post->AirpressCollection)){
 	    	$collection = $post->AirpressCollection;
 	    } else {
-	    	$this->debug("NO AIRPRESS COLLECTION");
+	    	airpress_debug(0,"NO AIRPRESS COLLECTION with which to populate ".$a["field"]);
 	    	return null;
 	    }
 
@@ -165,7 +169,8 @@ class Airpress {
 		// Gather IDs
 		$record_ids = $collection->getFieldValues($keys);
 
-		$query = new AirpressQuery($collection->query->getConfig());
+		$query = new AirpressQuery();
+		$query->setConfig($collection->query->getConfig());
 	    $query->table($a["relatedto"]);
 	    $query->filterByRelated($record_ids);
 
@@ -232,6 +237,7 @@ class Airpress {
 			'single'			=> null,
 			'rollup'			=> null,
 			'default'			=> null,
+			'format'			=> null,
 	    ), $atts );
 
 	    $field_name = $a["name"];
@@ -246,9 +252,35 @@ class Airpress {
 
 		$collection = $post->AirpressCollection;
 
-		$values = $collection->getFieldValues($keys);
+		$output = "";
 
-		$output = implode("\n", $values);
+		if ( ! is_airpress_empty($collection) ){
+
+			$values = $collection->getFieldValues($keys);
+
+			if (isset($a["format"])){
+
+				// a typical filter would be: date|Y-m-d
+				// resulting in a hookable filter of: airfield_filter_date
+
+				$f = explode("|", $a["format"]);
+				foreach($values as &$value):
+					if ( has_filter("airfield_filter_".$f[0])){
+						$value = apply_filters("airfield_filter_".$f[0],$value,$a["format"]);
+					} else {
+						switch ($f[0]){
+							case "date":
+								$value = date($f[1],strtotime($value));
+							break;
+						}
+					}
+
+				endforeach;
+				unset($value);
+			}
+
+			$output = implode("\n", $values);			
+		}
 
 		// $output = "";
 		// foreach($collection as $record){
@@ -276,6 +308,7 @@ class Airpress {
 	function stash_and_trigger_deferred_queries(){
 
 		if (!empty($this->deferredQueries)){
+
 			$stash_key = "airpress_stash_".microtime(true);
 			set_transient($stash_key,$this->deferredQueries,60);
 			//trigger async request to process stashed queries
@@ -295,7 +328,7 @@ class Airpress {
 
 	function defer_query($query){
 		$hash = $query->hash();
-		$this->deferredQueries[$hash] = $query;
+		$this->deferredQueries[$hash] = clone $query;
 	}
 
 	function run_deferred_queries($stash_key){

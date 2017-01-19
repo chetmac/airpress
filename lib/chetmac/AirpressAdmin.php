@@ -90,6 +90,7 @@ function airpress_db_render( $active_tab = '' ) {
 
 function airpress_cx_render( $active_tab = '' ) {
 	global $airpress;
+
 ?>
 	<!-- Create a header in the default WordPress 'wrap' container -->
 	<div class="wrap">
@@ -261,6 +262,14 @@ function airpress_admin_cx_tab($key,$config) {
 
 function airpress_cx_validation($input){
 	global $wp_rewrite;
+
+	if ($input["debug"] == 1){
+		if ( ! is_writable( $input["log"]) ){
+			$input["debug"] = 0;
+			add_settings_error('airpress_cx_log', esc_attr( 'settings_updated' ), esc_attr($input["log"])." is not writable.","error");
+		}
+	}
+
 	$wp_rewrite->flush_rules();
 	return $input;
 }
