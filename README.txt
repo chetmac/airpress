@@ -69,16 +69,16 @@ Hello world!
 = Automatic Airtable Requests =
 Airpress comes with two built-in extensions—Virtual Fields and Virtual Posts—both of which are used to map certain Wordpress objects or URLs to Airtable records (one to one or one to many or many to many). Records that are automatically requested are stored in the variable $post->AirtableCollection
 
-```
+`
 <?php
 $e = $post->AirtableCollection[0];
 echo $e["Name"].": ".$e["Start Date"]."<br>";
 ?>
-```
+`
 or you can use the shortcode wherever shortcodes are allowed:
-```
+`
 [apr field="Name"]: [apr field="Start Date"]
-```
+`
 
 = Manual Airtable Requests =
 Airpress can be used to manually request records from Airtable by specifying the desired table, view, filter, sort, etc.
