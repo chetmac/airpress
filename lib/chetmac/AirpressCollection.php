@@ -300,6 +300,20 @@ class AirpressCollection extends ArrayObject {
 		return $this->lookup("id",$record["id"]);
 	}
 
+
+    /**
+     * Remove an item from the collection by key.
+     *
+     * @param  string|array  $keys
+     * @return $this
+     */
+    public function forget($keys)
+    {
+        foreach ((array) $keys as $key) {
+            $this->offsetUnset($key);
+        }
+    }
+
 	public function populateRelatedField($field,$query=null,$params=null){
 		global $airpress;
 
