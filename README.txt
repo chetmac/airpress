@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.0
+Stable tag: 1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,10 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 
 == Changelog ==
 
+= 1.1 =
+Added AirpressCollection->forget($keys)
+Added is_airpress_force_fresh() 
+
 = 1.0 =
 Hello world!
 
@@ -88,7 +92,7 @@ Airpress can be used to manually request records from Airtable by specifying the
 $query = new AirpressQuery();
 $query->setConfig("default");
 $query->table("Events")->view("Upcoming");
-$query->addFilter({Status}='Enabled');
+$query->addFilter("{Status}='Enabled'");
 
 $events = new AirpressCollection($query);
 
@@ -211,3 +215,11 @@ Airpress plays nicely with object caches and page caches. Please note that some 
 
 == Actions ==
 * airpress_virtualpost_setup
+
+== Functions ==
+* airpress_debug
+* is_airpress_force_fresh
+* get_airpress_configs
+* is_airpress_record
+* is_airpress_empty
+* is_airpress_collection
