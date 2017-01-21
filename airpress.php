@@ -137,6 +137,21 @@ function set_airpress_config($option_group, $id, $config){
 	update_option($option_group.$id,$config);
 }
 
+function is_airpress_force_fresh($config=0){
+	
+	if ( ! is_array($config) ){
+		$config = get_airpress_config("airpress_cx",$config);
+	}
+
+	$fresh_param = $config["fresh"];
+
+	if (isset($_GET[$fresh_param]) && $_GET[$fresh_param] == "true"){
+		return true;
+	} else {
+		return false;
+	}
+}
+
 function airpress_debug($cx=0,$message=null,$object=null){
 
 	if ( is_null($message) ){
