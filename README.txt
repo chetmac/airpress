@@ -62,8 +62,10 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 
 == Changelog ==
 
-= 1.1.1 =
+= 1.1.2 =
 * Ensured Compatibility with php 5.3
+
+= 1.1.1 =
 * Removed getConfig()[0] notation
 
 = 1.1 =
