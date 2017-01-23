@@ -86,7 +86,7 @@ class AirpressConnect{
 		endwhile;
 
 		$e = round(microtime(true) - $start,2);
-		airpress_debug($query->getConfig()["id"],$response_code."	".count($records)."	".$e."	".$query->toString());
+		airpress_debug($query->getConfig(),$response_code."	".count($records)."	".$e."	".$query->toString());
 
 		$query->setCachedResults($records);
 
