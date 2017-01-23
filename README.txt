@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.1
+Stable tag: 1.1.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,15 +58,20 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 4. The Restaurant page displays several fields from the Restaurants table as well as fields from the related Districts table.
 5. This single page is used by all restaurants because it is the selected Airpress Virtual Post template.
 6. This is the configuration page for a Virtual Post. You can see that regular expressions are used to match incoming URLs to Airtable records.
+7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
 
+= 1.1.1 =
+* Ensured Compatibility with php 5.3
+* Removed getConfig()[0] notation
+
 = 1.1 =
-Added AirpressCollection->forget($keys)
-Added is_airpress_force_fresh() 
+* Added AirpressCollection->forget($keys)
+* Added is_airpress_force_fresh() 
 
 = 1.0 =
-Hello world!
+* Hello world!
 
 == Basic Usage ==
 

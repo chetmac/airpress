@@ -51,7 +51,7 @@ class AirpressConnect{
 			if ( is_wp_error( $response ) || $response_code != 200) {
 
 				$e = round(microtime(true) - $start,2);
-				airpress_debug($query->getConfig()["id"],$response_code." | ".$query->toString()." ($e)",array($http_params,$response));
+				airpress_debug($query->getConfig(),$response_code." | ".$query->toString()." ($e)",array($http_params,$response));
 
 				if (isset($response['body'])){
   					$body = json_decode($response['body'],true); // use the content

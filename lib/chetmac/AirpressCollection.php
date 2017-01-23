@@ -20,7 +20,7 @@ class AirpressCollection extends ArrayObject {
 			$records = AirpressConnect::get($this->query);
 
 			if ($records != false){
-				//airpress_debug($this->query->getConfig()["id"],"New AirpressCollection from table {".$query->getTable()."} with ".count($records)." records.");
+				//airpress_debug($this->query->getConfig(),"New AirpressCollection from table {".$query->getTable()."} with ".count($records)." records.");
 			}
 
 			if ($records != false && !empty($records)){
@@ -34,7 +34,7 @@ class AirpressCollection extends ArrayObject {
 
 				}
 			} else {
-				//airpress_debug($this->query->getConfig()["id"],"Empty Collection created from table {".$query->getTable()."}");
+				//airpress_debug($this->query->getConfig(),"Empty Collection created from table {".$query->getTable()."}");
 			}
 
 		}
@@ -318,7 +318,7 @@ class AirpressCollection extends ArrayObject {
 		global $airpress;
 
 		if ($this->isEmpty()){
-			//airpress_debug($this->query->getConfig()["id"],"Can't populate an empty collection.");
+			//airpress_debug($this->query->getConfig(),"Can't populate an empty collection.");
 			return false;
 		}
 
@@ -334,7 +334,7 @@ class AirpressCollection extends ArrayObject {
 		$record_ids = $this->getFieldValues($keys);
 
 	    $query->filterByRelated($record_ids);
-	    //airpress_debug($this->query->getConfig()["id"],"Get records from {".$query->getTable()."} to populate ".$this->query->getTable()."|".$field);
+	    //airpress_debug($this->query->getConfig(),"Get records from {".$query->getTable()."} to populate ".$this->query->getTable()."|".$field);
 
 		$relatedCollection = new AirpressCollection($query);
 		$this->setFieldValues($keys,$relatedCollection,$query);
