@@ -3,6 +3,7 @@
 class AirpressVirtualPosts {
 
 	private $config = false;
+	private $matches = array();
 	private $AirpressCollection = false;
 
 	function init(){
@@ -34,7 +35,7 @@ class AirpressVirtualPosts {
 		if (isset($request->matched_rule)){
 
 			// populate $matches var to save parts of the request string
-			preg_match("/" . str_replace("/", "\/", $request->matched_rule) . "/", $request->request,$matches);
+			preg_match("/" . str_replace("/", "\/", $request->matched_rule) . "/", $request->request,$this->matches);
 
 			$configs = get_airpress_configs("airpress_vp");
 
@@ -96,10 +97,10 @@ class AirpressVirtualPosts {
 			// Process formula to inject any vars
 			$formula = $this->config["formula"];
 			$i = 1;
-			while (isset($matches[$i])){
+			while (isset($this->matches[$i])){
 				// use matches to replace variables in string like this.
 				// AND({Field Name} = '$1',{Field 2} = '$2')
-				$formula = str_replace("$".$i,$matches[$i],$formula);
+				$formula = str_replace("$".$i,$this->matches[$i],$formula);
 				$i++;
 			}
 
@@ -135,7 +136,7 @@ class AirpressVirtualPosts {
 			$configs = get_airpress_configs("airpress_vp");
 			// figure out which config to use
 			foreach($configs as $config){
-				if (preg_match("/" . str_replace("/", "\/", $config["pattern"]) . "/", $request->request,$matches)){
+				if (preg_match("/" . str_replace("/", "\/", $config["pattern"]) . "/", $request->request,$this->matches)){
 					$request->matched_rule = $config["pattern"];
 					break; // we got what we came for, let's jet
 				}
@@ -159,7 +160,33 @@ class AirpressVirtualPosts {
 				// if this virtual post returned data from Airtable, set it up
 				if ($this->AirpressCollection){
 					$slug_field = $this->config["field"];
-					$wp_query->post->guid = $wp_query->post->post_name = $this->AirpressCollection[0][$slug_field];
+					if (isset( $this->AirpressCollection[0][$slug_field] )){
+						airpress_debug("$slug_field exists so post_name is ".$this->AirpressCollection[0][$slug_field].".");
+						$wp_query->post->guid = $wp_query->post->post_name = $this->AirpressCollection[0][$slug_field];
+					} else if ( ! empty($slug_field) ) {
+
+						$post_name = $slug_field;
+
+						// replace squiggly brackets with Airtable data
+						if ( preg_match_all("`{([^}]+)}`",$post_name,$field_matches) ){
+							foreach($field_matches[1] as $field_name){
+								$field_value = ( isset($this->AirpressCollection[0][$field_name]) )? $this->AirpressCollection[0][$field_name] : "";
+								$post_name = str_replace("{".$field_name."}",$field_value,$post_name);
+							}
+						}
+
+						// replace $1 vars with matches
+						$i = 1;
+						while (isset($this->matches[$i])){
+							// use matches to replace variables in string like this.
+							// $1-{Field Name}
+							$post_name = str_replace("$".$i,$this->matches[$i],$post_name);
+							$i++;
+						}
+
+						airpress_debug("fancy post_name provided: ".$post_name);
+
+					}
 				} else {
 					airpress_debug("no data");
 					$this->force_404();
