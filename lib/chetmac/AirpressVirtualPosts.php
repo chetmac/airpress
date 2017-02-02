@@ -32,6 +32,7 @@ class AirpressVirtualPosts {
 	public function check_for_actual_page( $request ) {
 
 		if (isset($request->matched_rule)){
+
 			// populate $matches var to save parts of the request string
 			preg_match("/" . str_replace("/", "\/", $request->matched_rule) . "/", $request->request,$matches);
 
@@ -49,6 +50,13 @@ class AirpressVirtualPosts {
 					break; // we got what we came for, let's jet
 				}
 			}
+		}
+
+		// I just realized/discovered that EVERY request will have a request->matched_rule
+		// as long as pretty permalinks are enabled. sooo... must check that a config was
+		// matched, or else get outta here
+		if (!$this->config){
+			return;
 		}
 
 		// If request is empty, then the home page was requested
