@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.1.3
+Stable tag: 1.1.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -61,6 +61,11 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.4 =
+* multiple [apr_populate] or populateRelatedField calls are gracefully handled
+* add wrapper parameter for [apr] shortcode to compliment existing glue parameter
+* updated README with correct shortcode names
 
 = 1.1.3 =
 * VirtualPost post_name setting field can reference fields and matches now
