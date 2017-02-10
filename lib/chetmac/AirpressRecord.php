@@ -26,6 +26,12 @@ class AirpressRecord extends ArrayObject {
 
 	}
 
+	public function array_keys(){
+		$array = $this->toArray();
+		$keys = array_keys($array["fields"]);
+		return $keys;
+	}
+
 	public function dump(){
 		var_dump($this->storage);
 	}

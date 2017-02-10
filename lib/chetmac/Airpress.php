@@ -182,6 +182,11 @@ class Airpress {
 		// Gather IDs
 		$record_ids = $collection->getFieldValues($keys);
 
+		if ( is_airpress_record($record_ids[0]) ){
+			// This has ALREADY been populated fool! Move along.
+			return;
+		}
+
 		$query = new AirpressQuery();
 		$query->setConfig($collection->query->getConfig());
 	    $query->table($a["relatedto"]);
@@ -199,8 +204,9 @@ class Airpress {
 	    if (isset($a["maxrecords"]))
 	    	$query->maxRecords($a["maxrecords"]);
 
-		$subCollection = new AirpressCollection($query);
-		$collection->setFieldValues($keys,$subCollection,$query);
+	    $collection->populateRelatedField($keys,$query);
+		// $subCollection = new AirpressCollection($query);
+		// $collection->setFieldValues($keys,$subCollection,$query);
 
 	}
 
@@ -247,11 +253,12 @@ class Airpress {
 			'relatedto'			=> null,
 			'recordtemplate'	=> null,
 			'relatedtemplate'	=> null,
+			'wrapper'			=> null,
 			'single'			=> null,
 			'rollup'			=> null,
 			'default'			=> null,
 			'format'			=> null,
-			'glue'				=> null,
+			'glue'				=> "\n",
 	    ), $atts );
 
 	    $field_name = $a["field"];
@@ -293,10 +300,27 @@ class Airpress {
 				unset($value);
 			}
 
-			if (isset($a["glue"])){
-				$output = implode($a["glue"], $values);
+			if ( is_airpress_record($values[0]) ){
+				$keys = $values[0]->array_keys();
+				$output = "{$keys[0]} is a related record. You must specify a field for that record. Perhaps [apr field='$field_name|{$keys[0]}']";
+			} else if ( is_array($values[0]) && isset($values[0]["url"])){
+				$output = "{$field_name} is an image field. You must specify a format for that field. Perhaps [apr field='$field_name}|url' single]";
 			} else {
-				$output = implode(", ", $values);
+
+				if ($single){
+					$values = array($values[0]);
+				}
+
+				if ( isset($a["wrapper"]) ){
+					$output_values = array();
+					foreach($values as $value){
+						$output_values[] = sprintf($a["wrapper"],$value);
+					}
+					$values = $output_values;
+				}
+
+				$output = implode($a["glue"], $values);
+
 			}
 
 		}
@@ -310,11 +334,6 @@ class Airpress {
 		// 			$output .= sprintf($relatedTemplate,$value);
 		// 		}
 		// 	}
-
-		// 	if ($single)
-		// 		break; // only do first record
-
-		// }
 
 		return apply_filters( 'airpress_shortcode_filter', $output, $atts, $content, $tag );
 

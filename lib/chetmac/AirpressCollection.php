@@ -256,6 +256,17 @@ class AirpressCollection extends ArrayObject {
 
 			if (isset($array[$key])){
 				$array = $array[$key];
+			} else {
+				// Maybe it's an array of arrays
+				$return_array = array();
+				foreach($array as $item){
+					if ( isset($item[$key]) ){
+						$return_array[] = $item[$key];
+					}
+				}
+				if ( ! empty($return_array) ){
+					$array = $return_array;
+				}
 			}
 		}
 		return $array;
@@ -322,7 +333,11 @@ class AirpressCollection extends ArrayObject {
 			return false;
 		}
 
-		$keys = explode("|", $field);
+		if ( is_string($field) ){
+			$keys = explode("|", $field);
+		} else {
+			$keys = $field;
+		}
 
 		// $query is a string, so create the query object using parent collection query config
 		if (is_string($query)){
@@ -332,6 +347,9 @@ class AirpressCollection extends ArrayObject {
 
 		// Gather IDs
 		$record_ids = $this->getFieldValues($keys);
+
+		// to do?
+		// What happens if there are no record ids?
 
 	    $query->filterByRelated($record_ids);
 	    //airpress_debug($this->query->getConfig(),"Get records from {".$query->getTable()."} to populate ".$this->query->getTable()."|".$field);
