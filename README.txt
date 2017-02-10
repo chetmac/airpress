@@ -121,9 +121,9 @@ Related records may easily be retrieved both in PHP code and via shortcodes. Whe
 Consider a base with two related tables: _Events_ and _Locations_, if you populate the "Events" field of the Locations collection, it goes from being an array of RECORD_ID()s to an AirpressCollection with AirpressRecords.
 
 `
-[airpress_populate field="Location" relatedTo="Locations"]
-[airpress_populate field="Location|Owner" relatedTo="Contacts"]
-[airfield name="Name"] at [airfield name="Location|Name"] owned by [airfield name="Location|Owner|Name"]
+[apr_populate field="Location" relatedTo="Locations"]
+[apr_populate field="Location|Owner" relatedTo="Contacts"]
+[apr name="Name"] at [airfield name="Location|Name"] owned by [airfield name="Location|Owner|Name"]
 `
 
 `
