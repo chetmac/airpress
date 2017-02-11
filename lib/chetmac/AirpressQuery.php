@@ -166,7 +166,7 @@ class AirpressQuery {
 		*/
 
 		$pattern = "/OR\((RECORD_ID\(\)='([^']+)',?\s?)+\)/";
-		if ( preg_match_all($pattern, $params["filterByFormula"],$matches) ){
+		if ( isset($params["filterByFormula"]) && preg_match_all($pattern, $params["filterByFormula"],$matches) ){
 			foreach($matches[0] as $matched_string){
 				// count how many we replace
 				$pattern = "/RECORD_ID\(\)='([^']+)',?\s?/";

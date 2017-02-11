@@ -304,7 +304,7 @@ class Airpress {
 				$keys = $values[0]->array_keys();
 				$output = "{$keys[0]} is a related record. You must specify a field for that record. Perhaps [apr field='$field_name|{$keys[0]}']";
 			} else if ( is_array($values[0]) && isset($values[0]["url"])){
-				$output = "{$field_name} is an image field. You must specify a format for that field. Perhaps [apr field='$field_name}|url' single]";
+				$output = "{$field_name} is an image field. You must specify a format for that field. Perhaps [apr field='$field_name|url' single]";
 			} else {
 
 				if ($single){
