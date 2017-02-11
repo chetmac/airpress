@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.1.4
+Stable tag: 1.1.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -24,6 +24,8 @@ Airpress is a Wordpress plugin that integrates Airtable with Wordpress, allowing
 * Populate/fetch related records (and filter, sort, limit)
 * Access records from multiple Airtable bases
 * Use multiple Airtable API Keys
+
+[youtube https://www.youtube.com/v/y0UkzQFk5Ok ]
 
 == Installation ==
 
@@ -61,6 +63,10 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.5 =
+* Added video tutorial to readme
+* fixed undefined index: filterByFormula. Thanks @gobot
 
 = 1.1.4 =
 * multiple [apr_populate] or populateRelatedField calls are gracefully handled
