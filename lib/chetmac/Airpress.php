@@ -12,7 +12,7 @@ class Airpress {
 
 	function init(){
 
-		airpress_debug(0,"\n\nAIRPRESS LOADED",array("this is value zero"));
+		airpress_debug(0,"\n\nAIRPRESS LOADED");
 
 		$this->deferredQueries = array();
 

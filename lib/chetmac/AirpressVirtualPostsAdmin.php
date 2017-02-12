@@ -115,6 +115,7 @@ function airpress_admin_vp_tab($key,$config) {
 		"formula"		=> "{Your Airtable Field} = '$1'",
 		"table"			=> "Your Airtable Table",
 		"field"			=> "Your Airtable Field",
+		"field2"		=> "Your Airtable Field2",
 		"template"		=> null,
 
 	);
@@ -174,6 +175,11 @@ function airpress_admin_vp_tab($key,$config) {
 	###############################
 	$field_name = "field";
 	$field_title = "Airtable Field to be used as post_name";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+
+	###############################
+	$field_name = "field2";
+	$field_title = "Airtable Field to be used as post_title";
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################
