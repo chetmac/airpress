@@ -412,6 +412,7 @@ class Airpress {
 	}
 
 	public function renderDebugOutput(){
+
 		?>
 		<style type="text/css">
 			#airpress_debugger {
@@ -437,6 +438,7 @@ class Airpress {
 		<script type="text/javascript">
 		jQuery(document).ready(function(){
 			jQuery("#wp-admin-bar-airpress_debugger_toggle").click(function(e){
+				e.preventDefault();
 				jQuery("#airpress_debugger").toggle();
 			});
 
@@ -448,11 +450,11 @@ class Airpress {
 		</script>
 		<div id="airpress_debugger">
 		<?php
-		foreach($this->debug_stats as $name => $value){
-			echo $name.": ".$value."<br>";
-		}
+		// foreach($this->debug_stats as $name => $value){
+		// 	echo $name.": ".$value."<br>";
+		// }
 		?>
-		<hr>
+		<!-- <hr> -->
 		<?php echo $this->debug_output; ?>
 		</div>
 		<?php

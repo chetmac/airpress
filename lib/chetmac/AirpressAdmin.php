@@ -177,7 +177,7 @@ function airpress_admin_cx_tab($key,$config) {
 			"expire" => DAY_IN_SECONDS,
 			"api_url" => "https://api.airtable.com/v0/",
 			"fresh"  => "fresh",
-			"debug"	=> false,
+			"debug"	=> 0,
 			"log"	=> dirname(dirname(dirname(__FILE__)))."/airpress.log"
 		);
 
@@ -245,7 +245,7 @@ function airpress_admin_cx_tab($key,$config) {
 	################################
 	$field_name = "debug";
 	$field_title = "Enable Debugging";
-	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_cx_render_element_toggle', $option_name, $section_name, array($options,$option_name,$field_name) );
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_cx_render_element_select__debug', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################
 	$field_name = "log";
@@ -263,11 +263,17 @@ function airpress_admin_cx_tab($key,$config) {
 function airpress_cx_validation($input){
 	global $wp_rewrite;
 
-	if ($input["debug"] == 1){
-		if ( ! is_writable( $input["log"]) ){
+	if ($input["debug"] == 1 || $input["debug"] == 2){
+
+		if ( $h = @fopen($input["log"], "a") ){
+			$message = "log file created at ".$input["log"];
+			fwrite($h, $message."\n");
+			fclose($h);
+		} else {
 			$input["debug"] = 0;
 			add_settings_error('airpress_cx_log', esc_attr( 'settings_updated' ), esc_attr($input["log"])." is not writable.","error");
 		}
+
 	}
 
 	$wp_rewrite->flush_rules();
@@ -343,6 +349,24 @@ function airpress_admin_cx_render_element_select__page($args) {
 		$selected = ($options[$field_name] == $page->ID)? " selected" : "";
 		$option = '<option value="' . $page->ID . '"'.$selected.'>';
 		$option .= $page->post_title." (".$page->post_name.")";
+		$option .= '</option>';
+		echo $option;
+	}
+	echo '</select>';
+}
+
+function airpress_admin_cx_render_element_select__debug($args) {
+	$options = $args[0];
+	$option_name = $args[1];
+	$field_name = $args[2];
+
+	echo '<select id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']">';
+	$select_options = array(0 => "Disabled", 1 => "Admin Bar & Logfile", 2 => "Logfile only", 3 => "Admin Bar only");
+
+	foreach ( $select_options as $value => $label ) {
+		$selected = ($options[$field_name] == $value)? " selected" : "";
+		$option = '<option value="' . $value . '"'.$selected.'>';
+		$option .= $label;
 		$option .= '</option>';
 		echo $option;
 	}

@@ -3,7 +3,7 @@
 Plugin Name: Airpress
 Plugin URI: http://chetmac.com/airpress
 Description: Extend Wordpress Posts, Pages, and Custom Fields with data from remote Airtable records.
-Version: 1.1.5
+Version: 1.1.6
 Author: Chester McLaughlin
 Author URI: http://chetmac.com
 License: GPLv2 or later
@@ -43,6 +43,7 @@ if (!isset($parsedown)){
 // add ajax handle which will act as trigger
 add_action( 'wp_ajax_nopriv_airpress_deferred', 'airpress_execute_deferred_queries' );
 add_action( 'wp_ajax_airpress_deferred', 'airpress_execute_deferred_queries' );
+
 
 function airpress_execute_deferred_queries() {
 	global $airpress;
@@ -153,6 +154,7 @@ function is_airpress_force_fresh($config=0){
 }
 
 function airpress_debug($cx=0,$message=null,$object=null){
+	global $airpress;
 
 	if ( is_null($message) ){
 		$message = $cx;
@@ -165,17 +167,37 @@ function airpress_debug($cx=0,$message=null,$object=null){
 		$config = $cx;
 	}
 	
-	if (isset($config["debug"]) && $config["debug"] != false){
-		if ( ! file_exists($config["log"]) || ! is_writeable($config["log"])){
-			return;
+	if ( isset($config["debug"]) ){
+
+		if ( $config["debug"] == 1 || $config["debug"] == 2 ){
+
+			if ( $h = @fopen($config["log"], "a") ){
+				fwrite($h, $message."\n");
+				if (isset($object)){
+					fwrite($h, "#########################################\n".print_r($object,true)."\n#########################################\n\n");
+					$airpress->debug_output .= "<div class='expandable'>".print_r($object,true)."</div>";
+				}
+				fclose($h);
+			}
+
 		}
 
-		$h = fopen($config["log"], "a");
-		fwrite($h, $message."\n");
-		if (isset($object)){
-			fwrite($h, "#########################################\n".print_r($object,true)."\n#########################################\n\n");
+		if ( $config["debug"] == 1 || $config["debug"] == 3 ){
+
+			if ( ! is_null($object) ){
+				$expanded = "";
+				ob_start();
+				var_dump($object);
+				$expanded .= ob_get_clean();;
+
+				$airpress->debug_output .= "<a class='expander' href='#'>$message</a>";
+				$airpress->debug_output .= "<div class='expandable'>$expanded</div>";
+			} else {
+				$airpress->debug_output .= $message."<br><br>";
+			}
+
 		}
-		fclose($h);
+
 	}
 	
 }
