@@ -3,7 +3,7 @@
 Plugin Name: Airpress
 Plugin URI: http://chetmac.com/airpress
 Description: Extend Wordpress Posts, Pages, and Custom Fields with data from remote Airtable records.
-Version: 1.1.6
+Version: 1.1.7
 Author: Chester McLaughlin
 Author URI: http://chetmac.com
 License: GPLv2 or later
@@ -175,7 +175,6 @@ function airpress_debug($cx=0,$message=null,$object=null){
 				fwrite($h, $message."\n");
 				if (isset($object)){
 					fwrite($h, "#########################################\n".print_r($object,true)."\n#########################################\n\n");
-					$airpress->debug_output .= "<div class='expandable'>".print_r($object,true)."</div>";
 				}
 				fclose($h);
 			}
@@ -185,16 +184,18 @@ function airpress_debug($cx=0,$message=null,$object=null){
 		if ( $config["debug"] == 1 || $config["debug"] == 3 ){
 
 			if ( ! is_null($object) ){
-				$expanded = "";
-				ob_start();
-				var_dump($object);
-				$expanded .= ob_get_clean();;
+				// ob_start();
+				// var_dump($object);
+				// $expanded = ob_get_clean();;
 
-				$airpress->debug_output .= "<a class='expander' href='#'>$message</a>";
-				$airpress->debug_output .= "<div class='expandable'>$expanded</div>";
+				$airpress->debug_output .= "+ <a class='expander' href='#'>$message</a>";
+				$airpress->debug_output .= "<div class='expandable'>".print_r($object,true)."</div>";
+				//$airpress->debug_output .= "<div class='expandable'>$expanded</div>";
 			} else {
-				$airpress->debug_output .= $message."<br><br>";
+				$airpress->debug_output .= $message;
 			}
+
+			$airpress->debug_output .= "<br><br>";
 
 		}
 

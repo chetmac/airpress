@@ -12,7 +12,7 @@ class Airpress {
 
 	function init(){
 
-		airpress_debug(0,"\n\nAIRPRESS LOADED");
+		airpress_debug(0,"\n\nAIRPRESS LOADED",array("this is value zero"));
 
 		$this->deferredQueries = array();
 
@@ -427,6 +427,10 @@ class Airpress {
 				left: 0px;
 				background-color: #f7f7f7;
 				z-index:99998;
+			}
+
+			#airpress_debugger .expander {
+				color: blue !important;
 			}
 			#airpress_debugger .expandable {
 				padding: 20px;

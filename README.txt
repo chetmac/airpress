@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.1.6
+Stable tag: 1.1.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,7 +64,10 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 
 == Changelog ==
 
-= 1.1.5 =
+= 1.1.7 =
+* Changed expandable debug message to blue
+
+= 1.1.6 =
 * Fixed Debug option so logfile can actually be created by plugin
 * Added debug option to enable on-screen debug log as well as logfile
 
