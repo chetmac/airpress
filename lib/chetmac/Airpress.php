@@ -80,7 +80,7 @@ class Airpress {
 	    	// By doing the shortcodes BEFORE any processing, we're ensuring that
 	    	// any nested loops ... or innermost loops are processed prior to outter most loops.
 	    	// if we don't do this all {{variables}} will be replaced by outter most loops.
-	    	airpress_debug(0,$content);
+
 	    	$template = do_shortcode($content);
 
 	    	foreach($replacementFields as $replacementField){
