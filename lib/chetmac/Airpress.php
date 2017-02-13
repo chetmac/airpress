@@ -38,10 +38,16 @@ class Airpress {
 		}
 
 		add_action( 'wp_footer', array($this,'renderDebugOutput') );
+		add_action( 'admin_footer', array($this,'renderDebugOutput') );
 		add_action( 'admin_bar_menu', array($this,'renderDebugToggle'), 999 );
 		add_action( 'shutdown', array($this,'stash_and_trigger_deferred_queries'));
 	}
 
+	public function simulateVirtualPost($request){
+		airpress_debug(0,"Simulating Virtual Post",$request);
+		$this->virtualPosts->check_for_actual_page( $request );
+		return $this->virtualPosts->AirpressCollection;
+	}
 
 /* CONFIGURATION FUNCTIONS */
 
@@ -53,6 +59,9 @@ class Airpress {
 	        'field'				=> null,
 	    ), $atts );
 
+		if ( is_airpress_empty($post->AirpressCollection) ){
+			return "no data found";
+		}
 
 	    if ($a["field"] === null){
 	    	$records_to_loop = (array)$post->AirpressCollection;

@@ -111,7 +111,8 @@ function airpress_admin_vp_tab($key,$config) {
 	$defaults = array(
 		"name"			=> "New Configuration",
 		"connection"	=> null,
-		"pattern"		=> "/something-unique/(.*)",
+		"pattern"		=> "^folder/(.*)",
+		"default"		=> "folder/my-unique-identifier",
 		"formula"		=> "{Your Airtable Field} = '$1'",
 		"table"			=> "Your Airtable Table",
 		"field"			=> "Your Airtable Field",
@@ -161,6 +162,11 @@ function airpress_admin_vp_tab($key,$config) {
 	$field_name = "pattern";
 	$field_title = "URL Pattern to Match";
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+
+	################################
+	$field_name = "default";
+	$field_title = "Test url";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_test', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################
 	$field_name = "formula";
@@ -216,6 +222,18 @@ function airpress_vp_add_rules(){
 		if (isset($config["pattern"]) && !empty($config["pattern"])){
 			airpress_vp_add_rule($config);	
 		}
+
+		if (isset($config["default"]) && !empty($config["default"])){
+			$permalink = get_permalink($config["template"]);
+			$protocol = (empty($_SERVER["HTTPS"]))? "http" : "https";
+			$remove = $protocol."://".$_SERVER["HTTP_HOST"]."/";
+			$permalink = trim(str_replace($remove,"",$permalink),"/");
+			$pattern = "^".$permalink."/?";
+
+			add_rewrite_rule($pattern, "index.php?page_id=".$config["template"]."&default_vp=".rawurlencode($config["default"]) , 'top');
+			//die("Redirect: $pattern => ".$config["default"]);
+		}
+
 	}
 
 }
@@ -234,6 +252,33 @@ function airpress_admin_vp_render_element_text($args) {
 	$field_name = $args[2];
 
 	echo '<input type="text" id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']" value="' . $options[$field_name] . '" />';
+}
+
+function airpress_admin_vp_render_element_test($args) {
+	global $airpress;
+	$options = $args[0];
+	$option_name = $args[1];
+	$field_name = $args[2];
+
+	echo '<input type="text" id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']" value="' . $options[$field_name] . '" />';
+
+	if (
+		isset($options["default"]) && 
+		isset($options["pattern"]) && 
+		isset($options["table"]) && 
+		isset($options["field"]) && 
+		isset($options["formula"])
+	){
+		$request = new StdClass();
+		$request->request = $options["default"];
+		$request->matched_rule = $options["pattern"];
+		$collection = $airpress->simulateVirtualPost($request);
+
+		echo "<br>This test URL matches ".count($collection)." records in table <em>".$options["table"]."</em>";
+
+
+
+	}
 }
 
 function airpress_admin_vp_render_element_toggle($args) {

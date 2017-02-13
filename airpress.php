@@ -203,4 +203,19 @@ function airpress_debug($cx=0,$message=null,$object=null){
 	
 }
 
+function is_cornerstone(){
+	if (isset($_GET["action"]) && $_GET["action"] == "cs_render_element"){
+		// Cornerstone Element Render
+		return "render";
+	} else if (isset($_GET["cornerstone_preview"])){
+		// Cornerstone Admin Preview iFrame
+		return "preview";
+	} else if (isset($_GET["cornerstone"])){
+		// Cornerstone Admin
+		return "admin";
+	} else {
+		return false;
+	}
+}
+
 ?>

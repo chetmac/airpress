@@ -4,13 +4,14 @@ class AirpressVirtualPosts {
 
 	private $config = false;
 	private $matches = array();
-	private $AirpressCollection = false;
+	public $AirpressCollection = false;
 
 	function init(){
 		global $wp_rewrite;
 
 		add_action( 'parse_request',		array($this,'check_for_actual_page') );
 		add_action( 'template_redirect',	array($this,'check_for_virtual_page') );//, -10);
+		add_filter( 'query_vars',			array($this,'add_query_vars' ));
 		add_action( 'the_post',				array($this,'last_chance_for_data') );//, -10);
 
 		// If Yoast SEO is NOT installed, we need to modify the
@@ -25,6 +26,11 @@ class AirpressVirtualPosts {
 			add_filter( 'wpseo_canonical',		array($this,'wpseo_canonical') );
 		}	
 	}
+
+	public function add_query_vars( $qvars ) {
+		$qvars[] = 'default_vp';
+		return $qvars;
+	}
    
 	/*
 	If one of our redirect rules matched, we want to check to see if it WOULD HAVE matched
@@ -33,9 +39,6 @@ class AirpressVirtualPosts {
 	public function check_for_actual_page( $request ) {
 
 		if (isset($request->matched_rule)){
-
-			// populate $matches var to save parts of the request string
-			preg_match("/" . str_replace("/", "\/", $request->matched_rule) . "/", $request->request,$this->matches);
 
 			$configs = get_airpress_configs("airpress_vp");
 
@@ -49,6 +52,12 @@ class AirpressVirtualPosts {
 					airpress_debug(0,$config["name"]." VirtualPost	".$config["pattern"]);
 					$this->config = $config;
 					break; // we got what we came for, let's jet
+				} else if ($request->query_vars["default_vp"] == $config["default"]){
+					airpress_debug(0,$config["name"]." DEFAULT VirtualPost	".$config["pattern"]);
+					$this->config = $config;
+					$request->matched_rule = $config["pattern"]; 
+					$request->request = $config["default"];
+					break; // we got what we came for, let's jet
 				}
 			}
 		}
@@ -59,6 +68,9 @@ class AirpressVirtualPosts {
 		if (!$this->config){
 			return;
 		}
+
+		// populate $matches var to save parts of the request string
+		preg_match("/" . str_replace("/", "\/", $request->matched_rule) . "/", $request->request,$this->matches);
 
 		// If request is empty, then the home page was requested
 		// and we're not going to allow home page to be virtual at this time...
@@ -121,26 +133,30 @@ class AirpressVirtualPosts {
 	}
 
 	public function last_chance_for_data($post){
-		if ( ! $this->config && function_exists("is_cornerstone") && is_cornerstone() == "render"){
-			// The cornerstone renderer doesn't use permalinks, just a post ID.
-			// So we have to wait until the post is setup, then determine the 
-			// permalink, THEN determine if the permalink matches any of our rules.
-			$protocol = (empty($_SERVER["HTTPS"]))? "http" : "https";
-			$remove = $protocol."://".$_SERVER["HTTP_HOST"]."/";
-			$request = new StdClass();
-			$request->request = str_replace($remove,"",get_permalink($post->ID));
-			
-			$request = apply_filters("airpress_virtualpost_last_chance",$request);
+		global $wp,$wp_query;
 
+		if ( ! $this->config && function_exists("is_cornerstone") && is_cornerstone() == "render"){
 
 			$configs = get_airpress_configs("airpress_vp");
+
+			if ( count($configs) == 0){
+				return;
+			}
+
+			$request = new StdClass();
+
 			// figure out which config to use
 			foreach($configs as $config){
-				if (preg_match("/" . str_replace("/", "\/", $config["pattern"]) . "/", $request->request,$this->matches)){
+
+				if ( $post->ID == $config["template"] ){
+					$request->request = $config["default"];
 					$request->matched_rule = $config["pattern"];
-					break; // we got what we came for, let's jet
+					break;
 				}
+
 			}
+
+			$request = apply_filters("airpress_virtualpost_last_chance",$request);
 
 			$this->check_for_actual_page( $request );
 			$this->setupPostObject();
