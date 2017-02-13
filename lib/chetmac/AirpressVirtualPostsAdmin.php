@@ -274,9 +274,11 @@ function airpress_admin_vp_render_element_test($args) {
 		$request->matched_rule = $options["pattern"];
 		$collection = $airpress->simulateVirtualPost($request);
 
-		echo "<br>This test URL matches ".count($collection)." records in table <em>".$options["table"]."</em>";
-
-
+		if ( is_airpress_collection($collection) ){
+			echo "<br>This test URL matches ".count($collection)." records in table <em>".$options["table"]."</em>";
+		} else {
+			echo "<br>No results from test url.";
+		}
 
 	}
 }

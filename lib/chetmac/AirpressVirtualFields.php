@@ -19,11 +19,24 @@ class AirpressVirtualFields{
 
 		if ( ! empty($configs) ){
     		add_filter('template_redirect', array($this,"airtable_lookup"), 1);
+
+    		if ( function_exists("is_cornerstone") && is_cornerstone() == "render" ){
+    			add_filter('the_post', array($this,"last_chance_for_data"));
+    		}
 		}
 
 	}
 
+	function last_chance_for_data($post){
+		global $wp_query;
+		if ( is_null($wp_query->post) ){
+			$wp_query->posts = array($post);
+			$this->airtable_lookup();
+		}
+	}
+
 	function airtable_lookup(){
+		
 		global $wp_query, $airpress;
 
 		$configs = get_airpress_configs("airpress_vf");
