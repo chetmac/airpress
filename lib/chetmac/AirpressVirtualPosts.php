@@ -52,7 +52,11 @@ class AirpressVirtualPosts {
 					airpress_debug(0,$config["name"]." VirtualPost	".$config["pattern"]);
 					$this->config = $config;
 					break; // we got what we came for, let's jet
-				} else if ($request->query_vars["default_vp"] == $config["default"]){
+				} else if (
+					isset($config["default"]) && 
+					isset($request->query_vars["default_vp"]) && 
+					$request->query_vars["default_vp"] == $config["default"]
+				){
 					airpress_debug(0,$config["name"]." DEFAULT VirtualPost	".$config["pattern"]);
 					$this->config = $config;
 					$request->matched_rule = $config["pattern"]; 
@@ -205,33 +209,35 @@ class AirpressVirtualPosts {
 
 					}
 
-					$title_field = $this->config["field2"];
-					if (isset( $this->AirpressCollection[0][$title_field] )){
-						airpress_debug("$title_field exists so post_title is ".$this->AirpressCollection[0][$title_field].".");
-						$wp_query->post->post_title = $this->AirpressCollection[0][$title_field];
-					} else if ( ! empty($title_field) ) {
+					$title_field = (isset($this->config["field2"]))? $this->config["field2"] : false;
+					if ( $title_field ){
+						if ( isset( $this->AirpressCollection[0][$title_field] ) ){
+							airpress_debug("$title_field exists so post_title is ".$this->AirpressCollection[0][$title_field].".");
+							$wp_query->post->post_title = $this->AirpressCollection[0][$title_field];
+						} else {
 
-						$post_title = $title_field;
+							$post_title = $title_field;
 
-						// replace squiggly brackets with Airtable data
-						if ( preg_match_all("`{([^}]+)}`",$post_title,$field_matches) ){
-							foreach($field_matches[1] as $field_name){
-								$field_value = ( isset($this->AirpressCollection[0][$field_name]) )? $this->AirpressCollection[0][$field_name] : "";
-								$post_title = str_replace("{".$field_name."}",$field_value,$post_title);
+							// replace squiggly brackets with Airtable data
+							if ( preg_match_all("`{([^}]+)}`",$post_title,$field_matches) ){
+								foreach($field_matches[1] as $field_name){
+									$field_value = ( isset($this->AirpressCollection[0][$field_name]) )? $this->AirpressCollection[0][$field_name] : "";
+									$post_title = str_replace("{".$field_name."}",$field_value,$post_title);
+								}
 							}
-						}
 
-						// replace $1 vars with matches
-						$i = 1;
-						while (isset($this->matches[$i])){
-							// use matches to replace variables in string like this.
-							// $1-{Field Name}
-							$post_title = str_replace("$".$i,$this->matches[$i],$post_title);
-							$i++;
-						}
+							// replace $1 vars with matches
+							$i = 1;
+							while (isset($this->matches[$i])){
+								// use matches to replace variables in string like this.
+								// $1-{Field Name}
+								$post_title = str_replace("$".$i,$this->matches[$i],$post_title);
+								$i++;
+							}
 
-						$wp_query->post->post_title = $post_title;
-						airpress_debug("fancy post_title provided: ".$post_title);
+							$wp_query->post->post_title = $post_title;
+							airpress_debug("fancy post_title provided: ".$post_title);
+						}
 
 					}
 				} else {
