@@ -14,6 +14,10 @@ class AirpressVirtualPosts {
 		add_filter( 'query_vars',			array($this,'add_query_vars' ));
 		add_action( 'the_post',				array($this,'last_chance_for_data') );//, -10);
 
+		add_filter( 'page_link',			array($this,'get_virtual_page_permalink'), 10, 3);
+		// hmmm... posts and pages are more different than previously assumed.
+		// add_filter( 'post_link',			array($this,'get_permalink'), 10, 3); 
+
 		// If Yoast SEO is NOT installed, we need to modify the
 		// build in wordpress canonical URL. Unfortunately there's
 		// no hook or filter for this yet so I'm replicating it
@@ -32,6 +36,19 @@ class AirpressVirtualPosts {
 		return $qvars;
 	}
    
+	public function get_virtual_page_permalink( $link, $id, $sample ){
+		global $wp;
+
+		$configs = get_airpress_configs("airpress_vp");
+
+		foreach( $configs as $config ){
+			if ( $id == $config["template"] ){
+				return home_url($wp->request);
+				break;
+			}
+		}
+	}
+
 	/*
 	If one of our redirect rules matched, we want to check to see if it WOULD HAVE matched
 	an actual wordpress post/page
