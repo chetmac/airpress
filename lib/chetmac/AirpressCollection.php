@@ -218,19 +218,19 @@ class AirpressCollection extends ArrayObject {
 
 					if (empty($keys)){
 						// no more keys to recurse, add the records of this collection to the array
-						$values = array_merge($values,(array)$record[$field]);
+						$values = array_unique(array_merge($values,(array)$record[$field]));
 					} else {
 						// ask the collection for the values for the next set of keys
-						$values = array_merge($values, $record[$field]->getFieldValues($keys) );
+						$values = array_unique(array_merge($values, $record[$field]->getFieldValues($keys) ) );
 					}
 
 				// Is this field an Array
 				} else if (is_array($record[$field])){
 
 					if (empty($keys)){
-						$values = array_merge($values,$record[$field]);						
+						$values = array_unique(array_merge($values,$record[$field]) );
 					} else {
-						$values = array_merge($values, $this->getArrayValue($record[$field],$keys) );
+						$values = array_unique(array_merge($values, $this->getArrayValue($record[$field],$keys) ) );
 					}
 
 				// Is this a string or somthing?
@@ -345,17 +345,32 @@ class AirpressCollection extends ArrayObject {
 			$query = new AirpressQuery($table,$this->query->getConfig(),$params);
 		}
 
+		$s = microtime(true);
 		// Gather IDs
 		$record_ids = $this->getFieldValues($keys);
 
-		// to do?
-		// What happens if there are no record ids?
+		$batch_results = array();
+		$batch_ids = $record_ids;
+		$i = 0;
+		while ( ! empty($batch_ids) ){
+			$i++;
+			$batch = array_splice($batch_ids, 0, 500);
+			$batch_query = clone $query;
+			$batch_query->filterByRelated($batch);
 
-	    $query->filterByRelated($record_ids);
-	    //airpress_debug($this->query->getConfig(),"Get records from {".$query->getTable()."} to populate ".$this->query->getTable()."|".$field);
+			$results = AirpressConnect::get($batch_query);
 
-		$relatedCollection = new AirpressCollection($query);
+			$batch_results = array_merge($batch_results,$results);
+			
+		    //airpress_debug($this->query->getConfig(),"BATCH $i (".count($batch).")");
+		}
+
+		$query->filterByRelated($record_ids);
+		$relatedCollection = new AirpressCollection($query,false); // not actually running query
+		$relatedCollection->setRecords($batch_results);
+
 		$this->setFieldValues($keys,$relatedCollection,$query);
+
 	}
 
 }

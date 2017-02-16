@@ -288,6 +288,10 @@ class AirpressQuery {
 		return $this;
 	}
 
+	public function resetFilter(){
+		unset($this->parameters["filterByFormula"]);
+	}
+
 	public function addFilter($filterByFormula,$type="AND"){
 		if (isset($this->parameters["filterByFormula"])){
 			$this->parameters["filterByFormula"] = $type."(".$this->parameters["filterByFormula"].",".$filterByFormula.")";
