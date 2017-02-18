@@ -232,7 +232,13 @@ class Airpress {
 	    $a["path"] = ltrim($a["path"], '/');
 
 	    $filepath = apply_filters("airpress_include_path_pre",$a["path"]);
-	    $filepath = get_stylesheet_directory()."/".$a["path"].".php";
+
+	    if ( substr(strtolower($filepath), -4) != ".php" ){
+	    	$filepath .= ".php";
+	    }
+
+	    $filepath = get_stylesheet_directory()."/".$filepath;
+
 	    $filepath = apply_filters("airpress_include_path",$filepath);
 
 	    if (is_file($filepath)){
@@ -241,7 +247,7 @@ class Airpress {
 	    	$html = ob_get_clean();
 	    	return do_shortcode($html);
 	    } else {
-	    	return basename($filepath)." not found.";
+	    	return $filepath." not found.";
 	    }
 	}
 
@@ -454,6 +460,7 @@ class Airpress {
 			jQuery("#wp-admin-bar-airpress_debugger_toggle").click(function(e){
 				e.preventDefault();
 				jQuery("#airpress_debugger").toggle();
+				jQuery('html, body').animate({ scrollTop: 0 }, 'fast');
 			});
 
 			jQuery(".expander").click(function(e){
