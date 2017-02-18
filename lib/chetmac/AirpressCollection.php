@@ -339,8 +339,12 @@ class AirpressCollection extends ArrayObject {
 			$keys = $field;
 		}
 
+		if ( is_null($query) ){
+			$query = end($keys);
+		}
+
 		// $query is a string, so create the query object using parent collection query config
-		if (is_string($query)){
+		if ( is_string($query) ){
 			$table = $query;
 			$query = new AirpressQuery($table,$this->query->getConfig(),$params);
 		}
@@ -360,8 +364,10 @@ class AirpressCollection extends ArrayObject {
 
 			$results = AirpressConnect::get($batch_query);
 
-			$batch_results = array_merge($batch_results,$results);
-			
+			if ( is_array($results) && ! empty($results) ){
+				$batch_results = array_merge($batch_results,$results);
+			}
+
 		    //airpress_debug($this->query->getConfig(),"BATCH $i (".count($batch).")");
 		}
 
