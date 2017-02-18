@@ -142,9 +142,9 @@ class AirpressQuery {
 			$age = ( time() - $storage["created_at"] );
 			//airpress_debug("This query cache is $age seconds old and refresh limit is ".($this->config["refresh"] - $age) );
 			if ( $age < $this->config["refresh"] ){
-				airpress_debug(0,"Cached Query ".$this->hash()." needs refreshing in ".($this->config["refresh"] - $age) );
+				airpress_debug(0,"Cached Query ".$this->toString()." needs refreshing in ".($this->config["refresh"] - $age) );
 			} else {
-				airpress_debug($this->config["id"],"DELAYED QUERY : /".$this->getTable()." : ".$this->hash()."	".$this->toString());
+				airpress_debug($this->config,"DELAYED QUERY : /".$this->getTable()." : ".$this->hash()."	".$this->toString());
 				$airpress->defer_query($this);
 			}
 			return $storage["records"];
@@ -282,7 +282,7 @@ class AirpressQuery {
 	## filterByFormula HELPERS
 	####################################
 
-	public function filterByRelated($object,$field="id"){
+	public function filterByRelated($object,$field="record_id"){
 		$related_ids = $this->compileRecordIDs($object,$field);
 		$this->addFilter("OR(RECORD_ID()='".implode("', RECORD_ID()='",$related_ids)."')");
 		return $this;
@@ -294,7 +294,14 @@ class AirpressQuery {
 
 	public function addFilter($filterByFormula,$type="AND"){
 		if (isset($this->parameters["filterByFormula"])){
+			
+			// Is this an AND we can just add to?
+			if ( strtoupper($type) == "AND" && preg_match("`^AND\((.*)\)$`i",$this->parameters["filterByFormula"], $matches) ){
+				$this->parameters["filterByFormula"] = $matches[1];
+			}
+
 			$this->parameters["filterByFormula"] = $type."(".$this->parameters["filterByFormula"].",".$filterByFormula.")";
+
 		} else {
 			$this->parameters["filterByFormula"] = $filterByFormula;
 		}
@@ -344,7 +351,7 @@ class AirpressQuery {
 		return (isset($this->errors))? $this->errors : false;
 	}
 
-  	public function compileRecordIDs($object,$field_name="id"){
+  	public function compileRecordIDs($object,$field_name="record_id"){
   		global $airpress;
 		$record_ids = array();
 
@@ -352,9 +359,9 @@ class AirpressQuery {
 
 		if ($class == "AirpressCollection"){
 			foreach($object as $record){
-				if ($field_name == "id"){
-					 if ($id = $record->record_id() ){
-						$record_ids[] = $id;
+				if ($field_name == "record_id"){
+					 if ($record_id = $record->record_id() ){
+						$record_ids[] = $record_id;
 					 }
 				} else {
 					$record_ids = array_merge($record_ids,$this->compileRecordIDs($record,$field_name));
@@ -364,22 +371,23 @@ class AirpressQuery {
 			
 			$record = &$object;
 
-			if ($field_name == "id"){
+			if ($field_name == "record_id"){
 				if ($id = $record->record_id()){
 					$record_ids[] = $id;
 				}
 			} else {
 				if (isset($record[$field_name])){
-					if (get_class($record[$field_name]) == "AirpressCollection"){
+					if (is_array($record[$field_name])){
+						// this is (most likely?!?) an array of record ids.
+						// which is to say, it's an AirpressCollection waiting to be populated
+						$record_ids = array_merge($record_ids,$record[$field_name]);
+					} else if (get_class($record[$field_name]) == "AirpressCollection"){
 						foreach($record[$field_name] as $r){
 							if ($id = $r->record_id()){
 								$record_ids[] = $id;
 							}
 						}
-					} else if (is_array($record[$field_name])){
-						// This shouldn't happen as all incoming records are searched for nested collections
-						$record_ids = array_merge($record_ids,$record[$field_name]);
-					}
+					} 
 				}
 			}
 		} else if (is_array($object)){
