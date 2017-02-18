@@ -43,10 +43,14 @@ class AirpressVirtualPosts {
 
 		foreach( $configs as $config ){
 			if ( $id == $config["template"] ){
-				return home_url($wp->request);
+				if ( ! empty($wp->request) ) {
+					return home_url($wp->request);
+				}
 				break;
 			}
 		}
+
+		return $link;
 	}
 
 	/*
@@ -278,9 +282,14 @@ class AirpressVirtualPosts {
 	private function setupPostObject(){
 		global $post;
 
-		$post->AirpressCollection = $this->AirpressCollection;
+		if ( ! is_airpress_empty($this->AirpressCollection) ){
 
-		do_action("airpress_virtualpost_setup",$this->config);
+			$post->AirpressCollection = $this->AirpressCollection;
+
+			do_action("airpress_virtualpost_setup",$this->config);
+
+		}
+
 	}
 
 	function force_404(){
