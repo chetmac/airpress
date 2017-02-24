@@ -106,7 +106,7 @@ class AirpressQuery {
 	}
 
 	public function getApiUrl(){
-		return "https://api.airtable.com/v0/";
+		return $this->config["api_url"];
 	}
 
 	public function setCachedResults($records){
@@ -225,6 +225,12 @@ class AirpressQuery {
 		return $this;
 	}
 
+	function prop($key, $val){
+		$this->properties[$key]=$val;
+
+		return $this;
+	}
+
 	####################################
 	## PARAMETERS
 	####################################
@@ -275,6 +281,12 @@ class AirpressQuery {
 
 	function view($value){
 		$this->parameters["view"] = $value;
+		return $this;
+	}
+
+	function param($key, $val){
+		$this->parameters[$key]=$val;
+
 		return $this;
 	}
 
