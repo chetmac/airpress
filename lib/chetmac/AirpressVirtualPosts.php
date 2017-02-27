@@ -11,6 +11,7 @@ class AirpressVirtualPosts {
 
 		add_action( 'parse_request',		array($this,'check_for_actual_page') );
 		add_action( 'template_redirect',	array($this,'check_for_virtual_page') );//, -10);
+
 		add_filter( 'query_vars',			array($this,'add_query_vars' ));
 		add_action( 'the_post',				array($this,'last_chance_for_data') );//, -10);
 
@@ -157,6 +158,23 @@ class AirpressVirtualPosts {
 	    return $request;
 	}
 
+	function template_reset( $template ) {
+		global $post;
+		
+		// If this is virtual
+		if ( isset($post->real_post_name) ){
+
+			$new_template = locate_template( array("page-{$post->real_post_name}.php") );
+
+		}
+
+		if ( ! empty($new_template) ){
+			$template = $new_template;
+		}
+
+		return $template;
+	}
+
 	public function last_chance_for_data($post){
 		global $wp,$wp_query;
 
@@ -200,6 +218,20 @@ class AirpressVirtualPosts {
 
 				// if this virtual post returned data from Airtable, set it up
 				if ($this->AirpressCollection){
+
+					// A virtual page requires an actual page to use as a template
+					// Consider if this template is named "My Template", it will have
+					// a post_name of "my-template" as automatically created by wordpress.
+					// When loading this page, the "locate_template" function would include a 
+					// check for the file "page-my-template.php" in the stylesheet directory.
+					// However, Virtual posts will be assigned a new post_name based on the airtable
+					// data with which they're populated, so we need to save the "real_post_name" and
+					// then add a filter to ensure that wordpress still checks for a file called
+					// page-my-template.php and not page-my-virtual-post-name.php ? Clear as mud? good.
+					$wp_query->post->real_post_name = $wp_query->post->post_name;
+					$wp_query->post->real_post_title = $wp_query->post->post_title;
+					add_filter( 'page_template', 		array($this,'template_reset'));
+
 					$slug_field = $this->config["field"];
 					if (isset( $this->AirpressCollection[0][$slug_field] )){
 						airpress_debug("$slug_field exists so post_name is ".$this->AirpressCollection[0][$slug_field].".");
@@ -225,7 +257,8 @@ class AirpressVirtualPosts {
 							$i++;
 						}
 
-						$wp_query->post->guid = $wp_query->post->post_name = $post_name;
+						$wp_query->post->post_name = $post_name;
+						$wp_query->post->guid = $post_name;
 						airpress_debug("fancy post_name provided: ".$post_name);
 
 					}
