@@ -126,8 +126,13 @@ class AirpressRecord extends ArrayObject {
 		return $this->id;
 	}
 
-	public function createdTime(){
+	public function created_time(){
 		return $this->createdTime;
+	}
+
+	// DEPRECATED
+	public function createdTime(){
+		return $this->created_time();
 	}
 
 	public function toArray(){

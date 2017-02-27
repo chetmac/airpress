@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.1.13
+Stable tag: 1.1.14
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,10 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.14 =
+deprecated $record->createdTime() and added $record->created_time() for consistency
+Fixed typo in documentation
 
 = 1.1.13 =
 Ensured VirtualPosts still look for page-{post_name}.php template
@@ -126,11 +130,11 @@ Added AirpressQuery->param() and ->prop for new/generic key/values
 == Basic Usage ==
 
 = Automatic Airtable Requests =
-Airpress comes with two built-in extensions—Virtual Fields and Virtual Posts—both of which are used to map certain Wordpress objects or URLs to Airtable records (one to one or one to many or many to many). Records that are automatically requested are stored in the variable $post->AirtableCollection
+Airpress comes with two built-in extensions—Virtual Fields and Virtual Posts—both of which are used to map certain Wordpress objects or URLs to Airtable records (one to one or one to many or many to many). Records that are automatically requested are stored in the variable $post->AirpressCollection
 
 `
 <?php
-$e = $post->AirtableCollection[0];
+$e = $post->AirpressCollection[0];
 echo $e["Name"].": ".$e["Start Date"]."<br>";
 ?>
 `
