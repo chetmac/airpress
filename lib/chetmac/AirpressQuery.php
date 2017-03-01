@@ -73,6 +73,24 @@ class AirpressQuery {
 			$this->setExpireAfter($params["expire"]);
 		}
 
+		if (isset($params["cacheImageFields"])){
+			$cif = $params["cacheImageFields"];
+
+			if ( isset($cif["fields"]) ){
+				$cif = array($cif);
+			}
+
+			foreach($cif as $c){
+
+				if ( isset($c["fields"]) ){
+					$sizes = ( isset($c["sizes"]) ) ? $c["sizes"] : null;
+					$this->cacheImageFields($c["fields"],$sizes);
+				}
+
+			}
+
+		}
+
 	}
 
 	public function hash(){
@@ -109,7 +127,9 @@ class AirpressQuery {
 		return $this->config["api_url"];
 	}
 
-	public function setCachedResults($records){
+	public function setCachedResults(&$records){
+		
+		$this->localizeImages($records);
 
 		if ($this->getRefreshAfter() <= 0 || $this->getExpireAfter() <= 0){
 			return false;
@@ -210,6 +230,40 @@ class AirpressQuery {
 		return $this;
 	}
 
+	function cacheImageFields($fields,$sizes=null,$crop=false,$regenerate=false){
+
+		if ( !isset($this->properties["cacheImageFields"]) ){
+			$this->properties["cacheImageFields"] = array();
+		}
+
+		if ( is_string($fields) ){
+			$fields = array($fields);
+		}
+
+		if ( is_null($sizes) ){
+			$sizes = array("full");
+		} else if ( is_string($sizes) ){
+			$sizes = array($sizes);
+		}
+
+		$this->properties["cacheImageFields"][] = array(
+													"fields" => $fields,
+													"sizes" => $sizes,
+													"crop" => $crop,
+													"regenerate" => $regenerate
+													);
+
+		return $this;
+	}
+
+	function getCacheImageFields(){
+		if ( !isset($this->properties["cacheImageFields"])){
+			return false;
+		} else {
+			return $this->properties["cacheImageFields"];
+		}
+	}
+
 	function getTable(){ return $this->properties["table"]; }
 
 	function getRefreshAfter(){
@@ -236,6 +290,9 @@ class AirpressQuery {
 	####################################
 
 	function fields($value){
+		if ( !is_array($value) ){
+			$value = func_get_args();
+		}
 		$this->parameters["fields"] = $value;
 		return $this;
 	}
@@ -409,6 +466,185 @@ class AirpressQuery {
 		$record_ids = array_unique($record_ids);
 
 		return $record_ids;
+  	}
+
+  	private function localizeImages(&$records){
+
+		$cacheImageFields = $this->getCacheImageFields();
+
+		if ( $cacheImageFields ){
+
+			$local_image_base = WP_CONTENT_DIR."/airpress-image-cache/";
+
+			if ( !is_writable($local_image_base) ){
+				airpress_debug(0,"Cannot write to $local_image_base");
+				return false;
+			}
+
+			$mime_types = wp_get_mime_types();
+			$new_types = array();
+			foreach($mime_types as $ext_string => $type){
+				$exts = explode("|", $ext_string);
+				$new_types[$type] = $exts[0];
+			}
+			$mime_types = $new_types;
+
+			// Multiple calls to cacheImageFields creates and array
+			// of field/size/crop combinations, so loop through all
+			foreach($cacheImageFields as $cif):
+
+				$fields = $cif["fields"];
+				$sizes = $cif["sizes"];
+				$crop = $cif["crop"];
+				$regenerate = $cif["regenerate"];
+
+				$size_defs = array();
+				foreach($sizes as $key => $size){
+					if ( is_array($size) ){
+						$name = $key;
+						$def = $size;
+					} else {
+						$name = ( $size == "thumb" ) ? "thumbnail" : $size;
+
+						if ( $name == "full" ){
+							$def = array();
+						} else {
+							// Use the media size defined (possibly) in WP Admin
+							$w = get_option($name."_size_w");
+							$h = get_option($name."_size_h");
+
+							if ( ! $w || ! $h){
+								airpress_debug($this->getConfig(),"The provided size of '$name' has no width or height params. Skipping.");
+								continue; // skip this size
+							}
+
+							$def = array("width" => $w, "height" => $h);
+						}
+
+					}
+					
+					if ( !isset($def["crop"]) ){
+						$def["crop"] = $crop;
+					}
+
+					if ( !isset($def["regenerate"]) ){
+						$def["regenerate"] = $regenerate;
+					}
+
+					$size_defs[$name] = $def;
+				}
+
+				$sizes = $size_defs;
+
+				if ( empty($sizes) ){
+					continue;
+				}
+
+				// this CIF may only be targeting a single field
+				// however it may also be targting more, so loop!
+				foreach($fields as $field):
+					
+					// Now that we're looking for a single field, let's
+					// look for it inside each record of our result set
+					foreach($records as &$record):$r = &$record["fields"];
+
+						if ( !isset($r[$field][0]["url"]) ){
+							// is either an empty image field or not an image field
+							continue;
+						}
+
+						if ( !isset($r[$field][0]["type"]) || substr($r[$field][0]["type"],0,5) != "image" ){
+							// must be an image type
+							continue;
+						}
+
+						foreach($r[$field] as &$airtable_image):
+
+							// this will merge with this fields thumbnails array from Airtable
+							$new_thumbnails = array();
+							
+							$filename = $airtable_image["id"];
+							$ext = $mime_types[$airtable_image["type"]];
+							$base_image_path = $local_image_base.$filename.".$ext";
+
+							if (file_exists($base_image_path)){
+								$wordpress_image = wp_get_image_editor( $base_image_path );								
+							} else {
+								$wordpress_image = wp_get_image_editor( $airtable_image["url"] );
+								if ( array_key_exists("full", $sizes) ){
+									$wordpress_image->save( $base_image_path );
+								}
+							}
+
+							if ( array_key_exists("full", $sizes) ){
+								$airtable_image["url"] = content_url("airpress-image-cache/$filename.$ext");
+							}
+
+							$base_size = $wordpress_image->get_size();
+
+							if ( is_wp_error( $wordpress_image ) ) {
+								airpress_debug($this->getConfig(),'Error getting/using image',$wordpress_image);
+								continue;
+							}
+							   
+						    foreach($sizes as $size_name => $size_def):
+
+					    		$filename = $airtable_image["id"];
+					    		$filename .= "-" . sanitize_title($size_name);
+								$filename .= "." . $ext;
+
+								$clone_image_path = $local_image_base.$filename;
+
+								if ( file_exists($clone_image_path) && $size_def["regenerate"] === false ){
+						    		$wordpress_clone = wp_get_image_editor( $clone_image_path );
+								} else {
+
+						    		$wordpress_clone = wp_get_image_editor( $base_image_path );
+
+									if ( is_wp_error( $wordpress_clone ) ){
+										airpress_debug($this->getConfig(),"wp_get_image_editor error: $base_image_path",$wordpress_clone);
+										continue;
+									}
+
+									$max_w = ( isset($size_def["width"]) )? $size_def["width"] : null;
+									$max_h = ( isset($size_def["height"]) )? $size_def["height"] : null;
+									$crop =  ( isset($size_def["crop"]) )? $size_def["crop"] : false;
+
+									if ( is_null($max_w) && is_null($max_h) ){
+										// something needs to be resized. Otherwise what's the point??!?
+										continue;
+									}
+
+						    		$wordpress_clone->resize( $max_w, $max_h, $crop );
+
+							    	$wordpress_clone->save( $clone_image_path );
+
+								}
+
+								$size = $wordpress_clone->get_size();
+								
+						    	$new_thumbnails[$size_name] = array(
+					    									"url" => content_url("airpress-image-cache")."/".$filename,
+					    									"width" => $size["width"],
+					    									"height" => $size["height"],
+						    								);
+
+						    endforeach; // new thumbnails
+
+						    // This is the magic line that updates the result records with the local paths
+						    // essentially injecting new thumbnails sizes, overwriting existing ones and 
+						    // changing image paths.
+							$airtable_image["thumbnails"] = array_merge($airtable_image["thumbnails"],$new_thumbnails);
+
+						endforeach; // airtable images
+
+					endforeach; // airtable records
+
+				endforeach; // CIF target fields
+
+			endforeach; // CIF groups
+
+		}
   	}
 }
 ?>
