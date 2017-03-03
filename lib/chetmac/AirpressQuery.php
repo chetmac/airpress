@@ -351,6 +351,9 @@ class AirpressQuery {
 	## filterByFormula HELPERS
 	####################################
 
+	/*
+	$object may be an array, a record, or a collection
+	*/
 	public function filterByRelated($object,$field="record_id"){
 		$related_ids = $this->compileRecordIDs($object,$field);
 		$this->addFilter("OR(RECORD_ID()='".implode("', RECORD_ID()='",$related_ids)."')");

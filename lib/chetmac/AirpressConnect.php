@@ -111,6 +111,10 @@ class AirpressConnect{
 	public static function create($config,$table,$fields){
 		global $airpress;
 
+		if ( ! is_array($config) ){
+			$config = get_airpress_config("airpress_cx",$config);
+		}
+
 		$http_headers = array(	'Authorization' => 'Bearer ' . $config["api_key"],
 							'Content-Type' => 'application/json'
 						);
@@ -129,12 +133,12 @@ class AirpressConnect{
 					"headers" => $http_headers,
 					"body" => json_encode($data),
 				);
-
+		
 		$response = wp_remote_post( $curlopt_url, $args );
 		$response_code = wp_remote_retrieve_response_code( $response );
 
 		if ( is_wp_error( $response ) || $response_code != 200) {
-			// Log error. wp_error?
+			airpress_debug($config,"Error while attempting to create record in $table",array($curlopt_url,$data,$response) );
 			return false;
 		} else {
 
