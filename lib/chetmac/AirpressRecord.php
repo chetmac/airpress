@@ -112,7 +112,7 @@ class AirpressRecord extends ArrayObject {
 
 			// Loop through the IDs, which will respect the drag-and-drop order from Airtable
 			foreach($record_ids as $record_id){
-				$collection->addRecord($subCollection->lookup("id",$record_id));
+				$collection->addRecord($subCollection->lookup("record_id",$record_id));
 			}
 
 		}

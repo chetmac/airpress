@@ -114,7 +114,7 @@ class AirpressCollection extends ArrayObject {
 			$this->index[$key] = array();
 		}
 
-		if ($key == "id"){
+		if ($key == "record_id"){
 			$key_value = $record->record_id();
 		} else if (isset($record[$key])){
 			$key_value = $record[$key];
@@ -308,7 +308,7 @@ class AirpressCollection extends ArrayObject {
 		$record = AirpressConnect::create($config,$table,$fields);
 		$this->addRecord($record);
 		
-		return $this->lookup("id",$record["id"]);
+		return $this->lookup("record_id",$record["id"]);
 	}
 
 
