@@ -53,12 +53,9 @@ class AirpressConnect{
 				$e = round(microtime(true) - $start,2);
 				airpress_debug($query->getConfig(),$response_code." | ".$query->toString()." ($e)",array($http_params,$response));
 
-				if (isset($response['body'])){
-  					$body = json_decode($response['body'],true); // use the content
-				}
-
 				// Log error. wp_error?
 				return false;
+				
 			} else {
 
 				$header = $response['headers']; // array of http header lines

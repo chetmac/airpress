@@ -358,7 +358,7 @@ class AirpressCollection extends ArrayObject {
 		$i = 0;
 		while ( ! empty($batch_ids) ){
 			$i++;
-			$batch = array_splice($batch_ids, 0, 500);
+			$batch = array_splice($batch_ids, 0, 250);
 			$batch_query = clone $query;
 			$batch_query->filterByRelated($batch);
 
