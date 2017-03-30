@@ -574,9 +574,9 @@ class AirpressQuery {
 								$wordpress_image = wp_get_image_editor( $base_image_path );								
 							} else {
 								$wordpress_image = wp_get_image_editor( $airtable_image["url"] );
-								if ( array_key_exists("full", $sizes) ){
+								//if ( array_key_exists("full", $sizes) ){
 									$wordpress_image->save( $base_image_path );
-								}
+								//}
 							}
 
 							if ( array_key_exists("full", $sizes) ){
@@ -633,6 +633,10 @@ class AirpressQuery {
 						    								);
 
 						    endforeach; // new thumbnails
+
+						    if ( ! array_key_exists("full", $sizes) ){
+								unlink( $base_image_path );
+							}
 
 						    // This is the magic line that updates the result records with the local paths
 						    // essentially injecting new thumbnails sizes, overwriting existing ones and 
