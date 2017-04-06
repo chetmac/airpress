@@ -144,7 +144,7 @@ class AirpressVirtualPosts {
 
 			$query->filterByFormula($formula);
 
-			apply_filters("airpress_virtualpost_query",$query,$request);
+			$query = apply_filters("airpress_virtualpost_query",$query,$request);
 
 			
 			$result = new AirpressCollection($query);
@@ -272,14 +272,6 @@ class AirpressVirtualPosts {
 
 							$post_title = $title_field;
 
-							// replace squiggly brackets with Airtable data
-							if ( preg_match_all("`{([^}]+)}`",$post_title,$field_matches) ){
-								foreach($field_matches[1] as $field_name){
-									$field_value = ( isset($this->AirpressCollection[0][$field_name]) )? $this->AirpressCollection[0][$field_name] : "";
-									$post_title = str_replace("{".$field_name."}",$field_value,$post_title);
-								}
-							}
-
 							// replace $1 vars with matches
 							$i = 1;
 							while (isset($this->matches[$i])){
@@ -287,6 +279,14 @@ class AirpressVirtualPosts {
 								// $1-{Field Name}
 								$post_title = str_replace("$".$i,$this->matches[$i],$post_title);
 								$i++;
+							}
+
+							// replace squiggly brackets with Airtable data
+							if ( preg_match_all("`{([^}]+)}`",$post_title,$field_matches) ){
+								foreach($field_matches[1] as $field_name){
+									$field_value = ( isset($this->AirpressCollection[0][$field_name]) )? $this->AirpressCollection[0][$field_name] : "";
+									$post_title = str_replace("{".$field_name."}",$field_value,$post_title);
+								}
 							}
 
 							$wp_query->post->post_title = $post_title;

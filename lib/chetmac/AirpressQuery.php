@@ -472,6 +472,7 @@ class AirpressQuery {
   	}
 
   	private function localizeImages(&$records){
+  		global $_wp_additional_image_sizes;
 
 		$cacheImageFields = $this->getCacheImageFields();
 
@@ -479,7 +480,14 @@ class AirpressQuery {
 
 			$local_image_base = WP_CONTENT_DIR."/airpress-image-cache/";
 
-			if ( !is_writable($local_image_base) ){
+			if ( ! is_dir($local_image_base)){
+				if ( ! mkdir($local_image_base) ){
+					airpress_debug(0,"Cannot create $local_image_base");
+					return false;					
+				}
+			}
+
+			if ( ! is_writable($local_image_base) ){
 				airpress_debug(0,"Cannot write to $local_image_base");
 				return false;
 			}
@@ -511,6 +519,8 @@ class AirpressQuery {
 
 						if ( $name == "full" ){
 							$def = array();
+						} else if ( isset($_wp_additional_image_sizes[$name]) ){
+							$def = $_wp_additional_image_sizes[$name];
 						} else {
 							// Use the media size defined (possibly) in WP Admin
 							$w = get_option($name."_size_w");
@@ -575,6 +585,10 @@ class AirpressQuery {
 							} else {
 								$wordpress_image = wp_get_image_editor( $airtable_image["url"] );
 								//if ( array_key_exists("full", $sizes) ){
+									if ( is_wp_error( $wordpress_image ) ) {
+										airpress_debug($this->getConfig(),'Error getting/using image',$wordpress_image);
+										continue;
+									}
 									$wordpress_image->save( $base_image_path );
 								//}
 							}

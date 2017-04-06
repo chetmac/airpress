@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.1.20
+Stable tag: 1.1.22
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,36 +64,44 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 
 == Changelog ==
 
+= 1.1.22 =
+* airpress_virtualpost_query wasn't actually applied to $query
+* cacheImageFields now works with custom sizes! Thanks @mcloone for pointing out the bug 
+* cacheImageFields now politely attempts to create airpress-image-cache directory instead of simply whining about it
+
+= 1.1.21 =
+* Fixed bug with cacheImageFields when not saving full sized image
+
 = 1.1.20 =
-Changed batch size from 500 to 250 because of curl timeout when Airtable was slow
-Removed error condition where WP Error was accessed as array
+* Changed batch size from 500 to 250 because of curl timeout when Airtable was slow
+* Removed error condition where WP Error was accessed as array
 
 = 1.1.19 =
-Fixed strange error when using wp cli to update plugins
+* Fixed strange error when using wp cli to update plugins
 
 = 1.1.18 =
-Found and fixed another id => record_id instance
+* Found and fixed another id => record_id instance
 
 = 1.1.17 =
-AirpressConnect::update() now accepts a config object or int or string just like AirpressQuery()
+* AirpressConnect::update() now accepts a config object or int or string just like AirpressQuery()
 
 = 1.1.16 =
-AirpressConnect::create() now accepts a config object or int or string just like AirpressQuery()
+* AirpressConnect::create() now accepts a config object or int or string just like AirpressQuery()
 
 = 1.1.15 =
-created cacheImageFields() to locally cache Airtable images and allow for customized thumbnail sizes.
+* created cacheImageFields() to locally cache Airtable images and allow for customized thumbnail sizes.
 
 = 1.1.14 =
-deprecated $record->createdTime() and added $record->created_time() for consistency
-Fixed typo in documentation
+* deprecated $record->createdTime() and added $record->created_time() for consistency
+* Fixed typo in documentation
 
 = 1.1.13 =
-Ensured VirtualPosts still look for page-{post_name}.php template
+* Ensured VirtualPosts still look for page-{post_name}.php template
 
 = 1.1.12 =
-Added action to override deferred_queries function
-Started using connection config's api_url
-Added AirpressQuery->param() and ->prop for new/generic key/values
+* Added action to override deferred_queries function
+* Started using connection config's api_url
+* Added AirpressQuery->param() and ->prop for new/generic key/values
 
 = 1.1.11 =
 * Fixed blank permalink bug

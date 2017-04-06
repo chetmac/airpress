@@ -446,6 +446,7 @@ class Airpress {
 				position: absolute;
 				top: 0px;
 				left: 0px;
+				color:#000000;
 				background-color: #f7f7f7;
 				z-index:99998;
 			}
