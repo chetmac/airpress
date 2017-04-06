@@ -580,30 +580,8 @@ class AirpressQuery {
 							$ext = $mime_types[$airtable_image["type"]];
 							$base_image_path = $local_image_base.$filename.".$ext";
 
-							if (file_exists($base_image_path)){
-								$wordpress_image = wp_get_image_editor( $base_image_path );								
-							} else {
-								$wordpress_image = wp_get_image_editor( $airtable_image["url"] );
-								//if ( array_key_exists("full", $sizes) ){
-									if ( is_wp_error( $wordpress_image ) ) {
-										airpress_debug($this->getConfig(),'Error getting/using image',$wordpress_image);
-										continue;
-									}
-									$wordpress_image->save( $base_image_path );
-								//}
-							}
+							$cleanup_needed = false;
 
-							if ( array_key_exists("full", $sizes) ){
-								$airtable_image["url"] = content_url("airpress-image-cache/$filename.$ext");
-							}
-
-							$base_size = $wordpress_image->get_size();
-
-							if ( is_wp_error( $wordpress_image ) ) {
-								airpress_debug($this->getConfig(),'Error getting/using image',$wordpress_image);
-								continue;
-							}
-							   
 						    foreach($sizes as $size_name => $size_def):
 
 					    		$filename = $airtable_image["id"];
@@ -616,12 +594,15 @@ class AirpressQuery {
 						    		$wordpress_clone = wp_get_image_editor( $clone_image_path );
 								} else {
 
-						    		$wordpress_clone = wp_get_image_editor( $base_image_path );
+						    		//$wordpress_clone = wp_get_image_editor( $base_image_path );
+						    		$wordpress_clone = $this->airtable_url_to_wp_image($airtable_image,$base_image_path);
 
 									if ( is_wp_error( $wordpress_clone ) ){
 										airpress_debug($this->getConfig(),"wp_get_image_editor error: $base_image_path",$wordpress_clone);
 										continue;
 									}
+
+									$cleanup_needed = true;
 
 									$max_w = ( isset($size_def["width"]) )? $size_def["width"] : null;
 									$max_h = ( isset($size_def["height"]) )? $size_def["height"] : null;
@@ -648,7 +629,11 @@ class AirpressQuery {
 
 						    endforeach; // new thumbnails
 
-						    if ( ! array_key_exists("full", $sizes) ){
+						    // If full was specified, then we won't delete the original image from
+						    // airtable, rather we'll rewrite the URL attribute to point local
+						    if ( array_key_exists("full", $sizes) ){
+								$airtable_image["url"] = content_url("airpress-image-cache/$filename.$ext");
+							} else if ( $cleanup_needed ) {
 								unlink( $base_image_path );
 							}
 
@@ -666,6 +651,38 @@ class AirpressQuery {
 			endforeach; // CIF groups
 
 		}
+  	}
+
+  	private function airtable_url_to_wp_image($airtable_image,$base_image_path){
+		if ( file_exists($base_image_path) ){
+
+			$wordpress_image = wp_get_image_editor( $base_image_path );
+
+		} else {
+
+			file_put_contents($base_image_path,file_get_contents($airtable_image["url"]));
+			$wordpress_image = wp_get_image_editor( $base_image_path );
+
+			if ( function_exists("exif_read_data") ){
+				$exif = @exif_read_data($base_image_path);
+				switch($exif["Orientation"]){
+					case 8:
+						$wordpress_image->rotate(90);
+					break;
+					case 3:
+						$wordpress_image->rotate(180);
+					break;
+					case 6:
+						$wordpress_image->rotate(-90);
+					break;
+				}
+				airpress_debug($this->getConfig(),"Applying rotation to $base_image_path",$exif);
+				$wordpress_image->save( $base_image_path );
+			}
+
+		}
+
+		return $wordpress_image;
   	}
 }
 ?>
