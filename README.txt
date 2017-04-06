@@ -68,6 +68,7 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 * airpress_virtualpost_query wasn't actually applied to $query
 * cacheImageFields now works with custom sizes! Thanks @mcloone for pointing out the bug 
 * cacheImageFields now politely attempts to create airpress-image-cache directory instead of simply whining about it
+* fixed issue with VirtualPost post_title when dollar sign was in the Airtable field data
 
 = 1.1.21 =
 * Fixed bug with cacheImageFields when not saving full sized image
