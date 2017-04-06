@@ -204,7 +204,11 @@ class AirpressQuery {
 	}
 
 	public function getConfig(){
-		return $this->config;
+		if ( empty($this->config) ){
+			return false;
+		} else {
+			return $this->config;
+		}
 	}
 
 	public function setConfig($config){
@@ -381,13 +385,12 @@ class AirpressQuery {
 	}
 
 	public function addRelatedQuery($field,$query){
-
 		// Query is simply name of table
-		if (is_string($query)){
+		if ( is_string($query) ){
 			$table = $query; // table name was passed instead of query object
 			$config = $this->getConfig(); // use the same config as parent query
 			$query = new AirpressQuery($table,$this->getConfig());
-		} else if (is_object($query) && $query->getConfig() === null){
+		} else if ( is_object($query) && ! $query->getConfig() ){
 			$config = $this->getConfig();
 			$query->setConfig($config); // use the same config as parent query
 		}
@@ -665,19 +668,24 @@ class AirpressQuery {
 
 			if ( function_exists("exif_read_data") ){
 				$exif = @exif_read_data($base_image_path);
+				$degrees = 0;
 				switch($exif["Orientation"]){
 					case 8:
-						$wordpress_image->rotate(90);
+						$degrees = 90;
 					break;
 					case 3:
-						$wordpress_image->rotate(180);
+						$degrees = 180;
 					break;
 					case 6:
-						$wordpress_image->rotate(-90);
+						$degrees = -90;
 					break;
 				}
-				airpress_debug($this->getConfig(),"Applying rotation to $base_image_path",$exif);
-				$wordpress_image->save( $base_image_path );
+
+				if ( $degrees ){
+					airpress_debug($this->getConfig(),"Applying rotation to $base_image_path",$exif);
+					$wordpress_image->rotate($degrees);
+					$wordpress_image->save( $base_image_path );
+				}
 			}
 
 		}

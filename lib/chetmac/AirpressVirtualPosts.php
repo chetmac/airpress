@@ -144,7 +144,7 @@ class AirpressVirtualPosts {
 
 			$query->filterByFormula($formula);
 
-			$query = apply_filters("airpress_virtualpost_query",$query,$request);
+			$query = apply_filters("airpress_virtualpost_query",$query,$request,$this->config);
 
 			
 			$result = new AirpressCollection($query);

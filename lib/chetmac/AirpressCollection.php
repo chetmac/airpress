@@ -170,14 +170,15 @@ class AirpressCollection extends ArrayObject {
 		}
 
 		foreach($this as $record){
-			if (isset($record[$field]) && $record->isFieldRelated($field) ){
+			if ( isset($record[$field]) && $record->isFieldRelated($field) ){
 
-				if (!empty($fields) && is_object($record[$field]) && get_class($record[$field]) == "AirpressCollection"){
+				if ( ! empty($fields) && is_object($record[$field]) && get_class($record[$field]) == "AirpressCollection" ){
 					$record[$field]->setFieldValues($fields,$subCollection,$query);
-				} else if (empty($fields)){
+				} else if ( empty($fields) ){
 					$record->populateField($field,$subCollection,$query);
 				} else {
 					// asking for something that doesn't exist
+					airpress_debug(0,"asking for something that doesn't exist");
 				}
 
 			}
@@ -329,7 +330,7 @@ class AirpressCollection extends ArrayObject {
 		global $airpress;
 
 		if ($this->isEmpty()){
-			//airpress_debug($this->query->getConfig(),"Can't populate an empty collection.");
+			airpress_debug($this->query->getConfig(),"Can't populate an empty collection.");
 			return false;
 		}
 
@@ -352,6 +353,12 @@ class AirpressCollection extends ArrayObject {
 		$s = microtime(true);
 		// Gather IDs
 		$record_ids = $this->getFieldValues($keys);
+
+		if ( isset($record_ids[0]) && is_airpress_record($record_ids[0]) ){
+			// This has already been populated.
+			airpress_debug($this->query->getConfig(),"Attempting to re-populate a collection.",$keys);
+			return false;
+		}
 
 		$batch_results = array();
 		$batch_ids = $record_ids;

@@ -34,7 +34,7 @@ class AirpressConnect{
 					. "?" . http_build_query($http_params);
 
 			$args = array(
-			    'timeout'     => 30,
+			    'timeout'     => 60,
 			    'redirection' => 5,
 			    'blocking'    => $blocking,
 			    'headers'     => $http_headers,
