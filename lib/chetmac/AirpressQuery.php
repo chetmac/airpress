@@ -587,7 +587,7 @@ class AirpressQuery {
 
 						    foreach($sizes as $size_name => $size_def):
 
-					    		$clone_filename = $airtable_image["id"];
+					    		$clone_filename = $filename;
 					    		$clone_filename .= "-" . sanitize_title($size_name);
 								$clone_filename .= "." . $ext;
 
@@ -635,7 +635,7 @@ class AirpressQuery {
 						    // If full was specified, then we won't delete the original image from
 						    // airtable, rather we'll rewrite the URL attribute to point local
 						    if ( array_key_exists("full", $sizes) ){
-								$airtable_image["url"] = content_url("airpress-image-cache/$filename");
+								$airtable_image["url"] = content_url("airpress-image-cache/$filename.$ext");
 							} else if ( $cleanup_needed ) {
 								unlink( $base_image_path );
 							}

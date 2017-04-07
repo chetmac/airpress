@@ -64,6 +64,9 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 
 == Changelog ==
 
+= 1.1.27 =
+* bugs
+
 = 1.1.26 =
 * cacheImageFields no longer duplicates file extensions on cached full images(.jpg.jpg). Thanks @mcloone
 * VirtualPosts admin will not apply the airpress_virtualpost_query filter on save. This will keep related queries and cached images from slowing down what should be a simple test to see if a given URL will match any records.
