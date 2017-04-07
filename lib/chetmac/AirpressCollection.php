@@ -215,11 +215,12 @@ class AirpressCollection extends ArrayObject {
 			} else if (isset($record[$field])){
 
 				// Is this field a collection? i
-				if (is_object($record[$field]) && get_class($record[$field]) == "AirpressCollection"){
+				if ( is_airpress_collection($record[$field]) ){
 
 					if (empty($keys)){
 						// no more keys to recurse, add the records of this collection to the array
-						$values = array_unique(array_merge($values,(array)$record[$field]));
+						// array_unique doesn't work on objects
+						$values = array_merge($values,(array)$record[$field]);
 					} else {
 						// ask the collection for the values for the next set of keys
 						$values = array_unique(array_merge($values, $record[$field]->getFieldValues($keys) ) );
