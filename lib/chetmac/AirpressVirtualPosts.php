@@ -58,7 +58,7 @@ class AirpressVirtualPosts {
 	If one of our redirect rules matched, we want to check to see if it WOULD HAVE matched
 	an actual wordpress post/page
 	*/
-	public function check_for_actual_page( $request ) {
+	public function check_for_actual_page( $request, $simulation=false ) {
 
 		if (isset($request->matched_rule)){
 
@@ -144,8 +144,12 @@ class AirpressVirtualPosts {
 
 			$query->filterByFormula($formula);
 
-			$query = apply_filters("airpress_virtualpost_query",$query,$request,$this->config);
-
+			if ( $simulation ){
+				$query->fields(array()); // specify no fields so this is as quick as possible
+			} else {
+				$query = apply_filters("airpress_virtualpost_query",$query,$request,$this->config);
+			}
+			
 			
 			$result = new AirpressCollection($query);
 

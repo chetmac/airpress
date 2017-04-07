@@ -587,11 +587,11 @@ class AirpressQuery {
 
 						    foreach($sizes as $size_name => $size_def):
 
-					    		$filename = $airtable_image["id"];
-					    		$filename .= "-" . sanitize_title($size_name);
-								$filename .= "." . $ext;
+					    		$clone_filename = $airtable_image["id"];
+					    		$clone_filename .= "-" . sanitize_title($size_name);
+								$clone_filename .= "." . $ext;
 
-								$clone_image_path = $local_image_base.$filename;
+								$clone_image_path = $local_image_base.$clone_filename;
 
 								if ( file_exists($clone_image_path) && $size_def["regenerate"] === false ){
 						    		$wordpress_clone = wp_get_image_editor( $clone_image_path );
@@ -625,7 +625,7 @@ class AirpressQuery {
 								$size = $wordpress_clone->get_size();
 								
 						    	$new_thumbnails[$size_name] = array(
-					    									"url" => content_url("airpress-image-cache")."/".$filename,
+					    									"url" => content_url("airpress-image-cache")."/".$clone_filename,
 					    									"width" => $size["width"],
 					    									"height" => $size["height"],
 						    								);
@@ -635,7 +635,7 @@ class AirpressQuery {
 						    // If full was specified, then we won't delete the original image from
 						    // airtable, rather we'll rewrite the URL attribute to point local
 						    if ( array_key_exists("full", $sizes) ){
-								$airtable_image["url"] = content_url("airpress-image-cache/$filename.$ext");
+								$airtable_image["url"] = content_url("airpress-image-cache/$filename");
 							} else if ( $cleanup_needed ) {
 								unlink( $base_image_path );
 							}
@@ -669,16 +669,19 @@ class AirpressQuery {
 			if ( function_exists("exif_read_data") ){
 				$exif = @exif_read_data($base_image_path);
 				$degrees = 0;
-				switch($exif["Orientation"]){
-					case 8:
-						$degrees = 90;
-					break;
-					case 3:
-						$degrees = 180;
-					break;
-					case 6:
-						$degrees = -90;
-					break;
+	
+				if ( isset($exif["Orientation"]) ){
+					switch($exif["Orientation"]){
+						case 8:
+							$degrees = 90;
+						break;
+						case 3:
+							$degrees = 180;
+						break;
+						case 6:
+							$degrees = -90;
+						break;
+					}
 				}
 
 				if ( $degrees ){

@@ -45,7 +45,7 @@ class Airpress {
 
 	public function simulateVirtualPost($request){
 		airpress_debug(0,"Simulating Virtual Post",$request);
-		$this->virtualPosts->check_for_actual_page( $request );
+		$this->virtualPosts->check_for_actual_page( $request, true);
 		airpress_debug(0,"Simulated Virtual Post Collection",$this->virtualPosts->AirpressCollection);
 		return $this->virtualPosts->AirpressCollection;
 	}
