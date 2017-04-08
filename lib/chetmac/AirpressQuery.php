@@ -632,7 +632,7 @@ class AirpressQuery {
 								$size = $wordpress_clone->get_size();
 								
 						    	$new_thumbnails[$size_name] = array(
-					    									"url" => content_url("airpress-image-cache")."/".$clone_filename,
+					    									"url" => content_url("airpress-image-cache")."/".$this->getTable()."/".$clone_filename,
 					    									"width" => $size["width"],
 					    									"height" => $size["height"],
 						    								);
@@ -697,7 +697,7 @@ class AirpressQuery {
 				}
 
 				if ( $degrees ){
-					airpress_debug($this->getConfig(),"Applying rotation to $base_image_path",$exif);
+					airpress_debug($this->getConfig(),"Applying rotation to $base_image_path");
 					$wordpress_image->rotate($degrees);
 					$wordpress_image->save( $base_image_path );
 				}
