@@ -481,10 +481,10 @@ class AirpressQuery {
 
 		if ( $cacheImageFields ){
 
-			$local_image_base = WP_CONTENT_DIR."/airpress-image-cache/";
+			$local_image_base = WP_CONTENT_DIR."/airpress-image-cache/".$this->getTable()."/";
 
 			if ( ! is_dir($local_image_base)){
-				if ( ! mkdir($local_image_base) ){
+				if ( ! mkdir($local_image_base,0777,true) ){
 					airpress_debug(0,"Cannot create $local_image_base");
 					return false;					
 				}
@@ -594,7 +594,14 @@ class AirpressQuery {
 								$clone_image_path = $local_image_base.$clone_filename;
 
 								if ( file_exists($clone_image_path) && $size_def["regenerate"] === false ){
+
 						    		$wordpress_clone = wp_get_image_editor( $clone_image_path );
+
+									if ( is_wp_error( $wordpress_clone ) ){
+										airpress_debug($this->getConfig(),"wp_get_image_editor error: file exists $clone_image_path",$wordpress_clone);
+										continue;
+									}
+
 								} else {
 
 						    		//$wordpress_clone = wp_get_image_editor( $base_image_path );
@@ -663,7 +670,12 @@ class AirpressQuery {
 
 		} else {
 
-			file_put_contents($base_image_path,file_get_contents($airtable_image["url"]));
+			//file_put_contents($base_image_path,file_get_contents($airtable_image["url"]));
+
+			$s = microtime(true);
+			$this->downloadFile($airtable_image["url"],$base_image_path);
+			airpress_debug($this->getConfig(),"Cached remote image in ".round((microtime(true)-$s)/60,4)." seconds to $base_image_path");
+
 			$wordpress_image = wp_get_image_editor( $base_image_path );
 
 			if ( function_exists("exif_read_data") ){
@@ -695,5 +707,26 @@ class AirpressQuery {
 
 		return $wordpress_image;
   	}
+
+  	private function downloadFile($url, $path)
+	{
+	    $newfname = $path;
+	    $file = fopen ($url, 'rb');
+	    if ($file) {
+	        $newf = fopen ($newfname, 'wb');
+	        if ($newf) {
+	            while(!feof($file)) {
+	                fwrite($newf, fread($file, 1024 * 8), 1024 * 8);
+	            }
+	        }
+	    }
+	    if ($file) {
+	        fclose($file);
+	    }
+	    if ($newf) {
+	        fclose($newf);
+	    }
+	}
+
 }
 ?>
