@@ -70,7 +70,11 @@ class Airpress {
 	    	// This is a nested loop!
 	    	$keys = explode("|",$a["field"]);
 	    	$field = array_shift($keys);
-	    	$records_to_loop = $this->currentRecord[$field]->getFieldValues($keys);
+	    	if (empty($keys)){
+	    		$records_to_loop = $this->currentRecord[$field];
+	    	} else {
+	    		$records_to_loop = $this->currentRecord[$field]->getFieldValues($keys);
+	    	}
 			$previousRecord = $this->currentRecord;
 	    } else {
 			$keys = explode("|", $a["field"]);
