@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.1.30
+Stable tag: 1.1.31
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -64,6 +64,10 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 
 == Changelog ==
 
+= 1.1.31 =
+* cacheImageFields will only process images for 25 seconds at a time and resume processing on the next load regardless of if ?fresh=true. The URL to Airtable's small thumbnail will be used in place of all unprocessed images... the idea is to mimick a progressive JPG, showing a low resolution version until the correct resolution is achieved.
+* Note: 25 seconds is extremely conservative as fopen, file_get_contents, etc don't count "againts" max_execution_time (typically 30 seconds), however the rotation of images, and the loop logic itself does count. 
+
 = 1.1.30 =
 * up to 10 nested loops now supported [apr_loop][apr_loop1][/apr_loop1][apr_loop] 
 
@@ -71,7 +75,7 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 * fixed cacheImageFields path and cleanup debug output for rotated images
 
 = 1.1.28 =
-* changed cacheImageFields from file_get_contents to "chunked" fopen for better reliability
+* changed cacheImageFields from file_get_contents to "chunked" fopen for better reliability (in hindsight this probably isn't any more reliable... not better, not worse, just different. See 1.1.31 for what is the real solution to reliably downloading images )
 
 = 1.1.27 =
 * bugs

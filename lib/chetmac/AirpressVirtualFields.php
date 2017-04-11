@@ -95,22 +95,24 @@ class AirpressVirtualFields{
 			$records = AirpressConnect::get($query);
 
 			$index = array();
-			foreach($records as $record){
+			if ($records):
+				foreach($records as $record){
 
-				if (!isset($record["fields"][$airtable_field]))
-					continue;
+					if (!isset($record["fields"][$airtable_field]))
+						continue;
 
-				$airtable_value = $record["fields"][$airtable_field];
+					$airtable_value = $record["fields"][$airtable_field];
 
-				if (empty($airtable_value))
-					continue;
+					if (empty($airtable_value))
+						continue;
 
-				if (!isset($index[$airtable_value]))
-					$index[$airtable_value] = array();
+					if (!isset($index[$airtable_value]))
+						$index[$airtable_value] = array();
 
-				// We're allowing for more than one matching record in the index.
-				$index[$airtable_value][] = $record;
-			}
+					// We're allowing for more than one matching record in the index.
+					$index[$airtable_value][] = $record;
+				}
+			endif;
 
 			// Loop through posts to inject airtable data into each post
 			foreach($wp_query->posts as $post){

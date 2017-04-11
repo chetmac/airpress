@@ -2,6 +2,7 @@
 
 class AirpressQuery {
 	
+	private $runtime_start;
 	private $config;
 	private $parameters;
 	private $properties;
@@ -12,6 +13,8 @@ class AirpressQuery {
 
 	public function __construct($table=null,$config=null,$params=array()){
 		global $airpress;
+
+		$this->runtime_start = microtime(true);
 
 		// Parameters will be encoded and sent to airtable as the query string
 		$this->parameters = array();
@@ -129,9 +132,9 @@ class AirpressQuery {
 
 	public function setCachedResults(&$records){
 		
-		$this->localizeImages($records);
+		$complete = $this->localizeImages($records);
 
-		if ($this->getRefreshAfter() <= 0 || $this->getExpireAfter() <= 0){
+		if ( !$complete || $this->getRefreshAfter() <= 0 || $this->getExpireAfter() <= 0){
 			return false;
 		}
 
@@ -167,7 +170,9 @@ class AirpressQuery {
 				airpress_debug($this->config,"DELAYED QUERY : /".$this->getTable()." : ".$this->hash()."	".$this->toString());
 				$airpress->defer_query($this);
 			}
+
 			return $storage["records"];
+
 		}
 
 		return false;
@@ -477,6 +482,9 @@ class AirpressQuery {
   	private function localizeImages(&$records){
   		global $_wp_additional_image_sizes;
 
+  		$complete = true;
+  		$stats = array("cached" => 0, "created" => 0, "rotated" => 0, "deferred" => 0);
+
 		$cacheImageFields = $this->getCacheImageFields();
 
 		if ( $cacheImageFields ){
@@ -598,11 +606,23 @@ class AirpressQuery {
 						    		$wordpress_clone = wp_get_image_editor( $clone_image_path );
 
 									if ( is_wp_error( $wordpress_clone ) ){
-										airpress_debug($this->getConfig(),"wp_get_image_editor error: file exists $clone_image_path",$wordpress_clone);
+										airpress_debug($this->getConfig(),"wp_get_image_editor error: bad image file $clone_image_path",$wordpress_clone);
 										continue;
 									}
 
 								} else {
+
+									$runtime = (microtime(true)-$this->runtime_start);
+									if ( $runtime > 25) {
+						    			$new_thumbnails[$size_name] = array(
+					    					"url" => $airtable_image["thumbnails"]["small"]["url"],
+					    								"width" => $airtable_image["thumbnails"]["small"]["width"],
+					    								"height" => $airtable_image["thumbnails"]["small"]["height"],
+						    						);
+										airpress_debug(0,"SOFT TIMEOUT after ".round($runtime,2).". Will attempt to reprocess ".$size_name." of ".$airtable_image["filename"]);
+										$complete = false;
+										continue;
+									}
 
 						    		//$wordpress_clone = wp_get_image_editor( $base_image_path );
 						    		$wordpress_clone = $this->airtable_url_to_wp_image($airtable_image,$base_image_path);
@@ -661,6 +681,9 @@ class AirpressQuery {
 			endforeach; // CIF groups
 
 		}
+
+		return $complete;
+
   	}
 
   	private function airtable_url_to_wp_image($airtable_image,$base_image_path){

@@ -223,7 +223,7 @@ function airpress_vp_add_rules(){
 			airpress_vp_add_rule($config);	
 		}
 
-		if (isset($config["default"]) && !empty($config["default"])){
+		if ( isset($config["default"]) && ! empty($config["default"]) ){
 			$permalink = get_permalink($config["template"]);
 			$protocol = (empty($_SERVER["HTTPS"]))? "http" : "https";
 			$remove = $protocol."://".$_SERVER["HTTP_HOST"]."/";
@@ -270,7 +270,7 @@ function airpress_admin_vp_render_element_test($args) {
 		isset($options["formula"])
 	){
 		$request = new StdClass();
-		$request->request = $options["default"];
+		$request->request = trim($options["default"],"/")."/";
 		$request->matched_rule = $options["pattern"];
 		$collection = $airpress->simulateVirtualPost($request);
 

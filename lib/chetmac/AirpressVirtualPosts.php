@@ -71,7 +71,7 @@ class AirpressVirtualPosts {
 			// figure out which config to use
 			foreach($configs as $config){
 				if ($request->matched_rule == $config["pattern"]){
-					airpress_debug(0,$config["name"]." VirtualPost	".$config["pattern"]);
+					airpress_debug(0,$config["name"]." VirtualPost	".$config["pattern"]." matched");
 					$this->config = $config;
 					break; // we got what we came for, let's jet
 				} else if (
@@ -91,7 +91,7 @@ class AirpressVirtualPosts {
 		// I just realized/discovered that EVERY request will have a request->matched_rule
 		// as long as pretty permalinks are enabled. sooo... must check that a config was
 		// matched, or else get outta here
-		if (!$this->config){
+		if ( ! $this->config ){
 			return;
 		}
 
@@ -101,11 +101,11 @@ class AirpressVirtualPosts {
 		// If request is empty, then the home page was requested
 		// and we're not going to allow home page to be virtual at this time...
 		// mostly because, why?
-		if (!empty($request->request)){
+		if ( ! empty($request->request) ){
 
 			$requested_post = get_page_by_path( $request->request ); // See if the original request WOULD have returned a page or 404
 
-        	if ($this->config){
+        	if ( $this->config ){
         		$this->config["requested_post"] = $requested_post;
         	}
 
@@ -117,6 +117,7 @@ class AirpressVirtualPosts {
 	        	// Virtual posts, let's undo what we've done.
 	            $request->query_vars['page_id'] = $requested_post->ID;
 	        }
+
 	    }
 
 	    // an active config means that we should ask Airtable for some data
@@ -306,7 +307,7 @@ class AirpressVirtualPosts {
 			} else {
 
 				// Yes, the request was for a real post, however it was for the template post so 404
-				if ($this->config["requested_post"]->ID == $this->config["template"] && !is_user_logged_in()){
+				if ( $this->config["requested_post"]->ID == $this->config["template"] && !is_user_logged_in()){
 					$this->force_404();
 				}
 
