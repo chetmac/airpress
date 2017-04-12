@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.7
-Stable tag: 1.1.31
+Stable tag: 1.1.32
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.32 =
+* Fixed bad debugging call (calling method on non object)
 
 = 1.1.31 =
 * cacheImageFields will only process images for 25 seconds at a time and resume processing on the next load regardless of if ?fresh=true. The URL to Airtable's small thumbnail will be used in place of all unprocessed images... the idea is to mimick a progressive JPG, showing a low resolution version until the correct resolution is achieved.
