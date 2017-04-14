@@ -83,11 +83,10 @@ class AirpressRecord extends ArrayObject {
 	public function populateField($field,$subCollection,$query){
 		global $airpress;
 		// Get array of record IDs
-		if (!is_array($this[$field])){
+		if ( ! is_array($this[$field]) ){
 			return;
 		}
 
-		//$airpress->debug("POPULATE FIELD $field ",$this[$field]);
 		$record_ids = $this[$field];
 
 		// Create Query object that matches exactly this collection
@@ -102,7 +101,7 @@ class AirpressRecord extends ArrayObject {
 			// Loop through the query results, which will respect the query sort order
 			foreach($subCollection as $record){
 
-				if (in_array($record->record_id(), $record_ids)){
+				if ( in_array($record->record_id(), $record_ids) ){
 					$collection->addRecord($record);
 				}
 
@@ -112,12 +111,19 @@ class AirpressRecord extends ArrayObject {
 
 			// Loop through the IDs, which will respect the drag-and-drop order from Airtable
 			foreach($record_ids as $record_id){
-				$collection->addRecord($subCollection->lookup("record_id",$record_id));
+				$record = $subCollection->lookup("record_id",$record_id);
+				if ( $record ){
+					$collection->addRecord($record);
+				} else {
+					// When this happens, it's most likely because a filter was used during the 
+					// creation of the subCollection that omitted this particular record_id.
+				}
 			}
 
 		}
 		
 		$this[$field] = $collection;
+		airpress_debug(0,"Thanks for populating field $field of ".$this["Name"],$this[$field]->toArray());
 
 		//$airpress->debug("Populate ".$collection->query->getTable()."->".$field." with ".count($collection)." records.",(array)$this[$field]);
 	}

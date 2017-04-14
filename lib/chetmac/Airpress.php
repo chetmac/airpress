@@ -204,7 +204,7 @@ class Airpress {
 		$query = new AirpressQuery();
 		$query->setConfig($collection->query->getConfig());
 	    $query->table($a["relatedto"]);
-	    $query->filterByRelated($record_ids);
+	    //$query->filterByRelated($record_ids);
 
 	    if (isset($a["filterbyformula"]))
 	    	$query->filterByFormula($a["filterbyformula"]);
@@ -291,7 +291,12 @@ class Airpress {
 
    		$keys = explode("|", $a["field"]);
 
-		$collection = $post->AirpressCollection;
+   		if ( isset($this->currentRecord) ){
+   			$field = array_shift($keys);
+			$collection = $this->currentRecord[$field];
+   		} else {
+			$collection = $post->AirpressCollection;
+   		}
 
 		$output = "";
 

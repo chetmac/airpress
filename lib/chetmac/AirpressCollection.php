@@ -172,13 +172,18 @@ class AirpressCollection extends ArrayObject {
 		foreach($this as $record){
 			if ( isset($record[$field]) && $record->isFieldRelated($field) ){
 
-				if ( ! empty($fields) && is_object($record[$field]) && get_class($record[$field]) == "AirpressCollection" ){
-					$record[$field]->setFieldValues($fields,$subCollection,$query);
-				} else if ( empty($fields) ){
+				if ( empty($fields) ){
+
 					$record->populateField($field,$subCollection,$query);
+
 				} else {
-					// asking for something that doesn't exist
-					airpress_debug(0,"asking for something that doesn't exist");
+					
+					if ( is_airpress_collection($record[$field]) ){
+						$record[$field]->setFieldValues($fields,$subCollection,$query);
+					} else {
+						airpress_debug($this->query->getConfig(),"asking for something that doesn't exist");
+					}
+
 				}
 
 			}
