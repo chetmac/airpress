@@ -230,7 +230,18 @@ class AirpressCollection extends ArrayObject {
 				} else if (is_array($record[$field])){
 
 					if (empty($keys)){
-						$values = array_unique(array_merge($values,$record[$field]) );
+
+						// is this an array of record IDs?
+						if (
+							isset($record[$field][0]) && 
+							is_string($record[$field][0]) && 
+							substr($record[$field][0],0,3) == "rec"
+						){
+							$values = array_unique(array_merge($values,$record[$field]));
+						} else {
+							$values = array_merge($values,$record[$field]);							
+						}
+
 					} else {
 						$values = array_unique(array_merge($values, $this->getArrayValue($record[$field],$keys) ) );
 					}
