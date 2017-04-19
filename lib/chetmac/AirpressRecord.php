@@ -123,7 +123,7 @@ class AirpressRecord extends ArrayObject {
 		}
 		
 		$this[$field] = $collection;
-		airpress_debug(0,"Thanks for populating field $field of ".$this["Name"],$this[$field]->toArray());
+		//airpress_debug(0,"Thanks for populating field $field of ".$this["Name"],$this[$field]->toArray());
 
 		//$airpress->debug("Populate ".$collection->query->getTable()."->".$field." with ".count($collection)." records.",(array)$this[$field]);
 	}
