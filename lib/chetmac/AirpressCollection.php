@@ -228,7 +228,7 @@ class AirpressCollection extends ArrayObject {
 						$values = array_merge($values,(array)$record[$field]);
 					} else {
 						// ask the collection for the values for the next set of keys
-						$values = array_unique(array_merge($values, $record[$field]->getFieldValues($keys) ) );
+						$values = array_unique(array_merge($values, $record[$field]->getFieldValues($keys) ),SORT_REGULAR );
 					}
 
 				// Is this field an Array
