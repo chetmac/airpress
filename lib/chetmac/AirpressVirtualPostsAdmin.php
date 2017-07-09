@@ -276,7 +276,11 @@ function airpress_admin_vp_render_element_test($args) {
 		isset($options["formula"])
 	){
 		$request = new StdClass();
-		$request->request = trim($options["default"],"/")."/";
+// fix for patterns not ending in "/"
+		$request->request = trim($options["default"],"/");
+		if (substr($options["pattern"],-1) == "/") {
+			$request->request .= "/";
+		}
 		$request->matched_rule = $options["pattern"];
 		$collection = $airpress->simulateVirtualPost($request);
 
