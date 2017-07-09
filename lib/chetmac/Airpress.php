@@ -7,7 +7,8 @@ class Airpress {
 	public $debug_output;
 	private $currentRecord;
 	public $debug_stats;
-
+	private $loopcount;
+	
 	private $deferred_queries;
 
 	function init(){
@@ -37,6 +38,9 @@ class Airpress {
 			add_shortcode( 'apr_loop'.$i, array($this,'shortcode_loop') );
 		}
 
+		// Loop counter
+		add_shortcode( 'apr_loopctr', array($this,'shortcode_loopctr') );
+		
 		add_action( 'wp_footer', array($this,'renderDebugOutput') );
 		add_action( 'admin_footer', array($this,'renderDebugOutput') );
 		add_action( 'admin_bar_menu', array($this,'renderDebugToggle'), 999 );
@@ -86,8 +90,15 @@ class Airpress {
 	    $replacementFields = array_unique($matches[1]);
 
 	    $output = "";
+		
+		// if not already counting this loop, do so
+		if (! isset($this->loopcount[$tag])){
+			$this->loopcount[$tag] = 0;
+		}
+			
 	    foreach($records_to_loop as $record){
 
+			$this->loopcount[$tag]++;
 	    	$this->currentRecord = $record;
 
 	    	// Reset the template for each record
@@ -158,6 +169,8 @@ class Airpress {
 	    if (isset($previousRecord)){
 	    	$this->currentRecord = $previousRecord;
 	    }
+
+		unset($this->loopcount[$tag]);
 
 	    return $output;
 	}
@@ -364,6 +377,27 @@ class Airpress {
 
 	}
 
+	public function shortcode_loopctr($atts, $content=null, $tag) {
+	    $a = shortcode_atts( array(
+	        'loop'				=> null,
+			'start'				=> null,
+	    ), $atts );
+		
+		if (isset($a["loop"])) {
+			if (! strpos($a["loop"],"apr_") === 0) {
+				$a["loop"] = "apr_" . $a["loop"];
+			} 
+		} else {
+			$a["loop"] = "apr_loop";
+		}
+		if (isset($this->loopcount[$a["loop"]])) {
+			if (isset($a["start"])) {
+				return $this->loopcount[$a["loop"]] + ($a["start"] - 1);
+			}
+			return $this->loopcount[$a["loop"]];
+		}
+	}
+	
 	####################################
 	## DEFERRED
 	####################################
