@@ -5,7 +5,7 @@ class Airpress {
 	private $virtualPosts;
 	private $virtualFields;
 	public $debug_output;
-	private $currentRecord;
+	private $loopScope;
 	public $debug_stats;
 
 	private $deferred_queries;
@@ -41,6 +41,8 @@ class Airpress {
 		add_action( 'admin_footer', array($this,'renderDebugOutput') );
 		add_action( 'admin_bar_menu', array($this,'renderDebugToggle'), 999 );
 		add_action( 'shutdown', array($this,'stash_and_trigger_deferred_queries'));
+
+		$this->loopScope = array();
 	}
 
 	public function simulateVirtualPost($request){
@@ -66,16 +68,15 @@ class Airpress {
 
 	    if ($a["field"] === null){
 	    	$records_to_loop = (array)$post->AirpressCollection;
-	    } else if (isset($this->currentRecord)){
+	    } else if ( ! empty($this->loopScope) ){
 	    	// This is a nested loop!
 	    	$keys = explode("|",$a["field"]);
 	    	$field = array_shift($keys);
 	    	if (empty($keys)){
-	    		$records_to_loop = $this->currentRecord[$field];
+	    		$records_to_loop = $this->loopScope[0][$field];
 	    	} else {
-	    		$records_to_loop = $this->currentRecord[$field]->getFieldValues($keys);
+	    		$records_to_loop = $this->loopScope[0][$field]->getFieldValues($keys);
 	    	}
-			$previousRecord = $this->currentRecord;
 	    } else {
 			$keys = explode("|", $a["field"]);
 		    $records_to_loop = $post->AirpressCollection->getFieldValues($keys);
@@ -88,7 +89,8 @@ class Airpress {
 	    $output = "";
 	    foreach($records_to_loop as $record){
 
-	    	$this->currentRecord = $record;
+	    	// place current record at ZERO
+	    	array_unshift($this->loopScope,$record);
 
 	    	// Reset the template for each record
 	    	// By doing the shortcodes BEFORE any processing, we're ensuring that
@@ -152,11 +154,8 @@ class Airpress {
 	    	}
 
 	    	$output .= $template;
-	    	unset($this->currentRecord);
-	    }
-
-	    if (isset($previousRecord)){
-	    	$this->currentRecord = $previousRecord;
+	    	// Take current record back off scope stack
+	    	array_shift($this->loopScope);
 	    }
 
 	    return $output;
@@ -278,6 +277,7 @@ class Airpress {
 			'rollup'			=> null,
 			'default'			=> null,
 			'format'			=> null,
+			'loopscope'			=> null,
 			'glue'				=> "\n",
 	    ), $atts );
 
@@ -290,19 +290,52 @@ class Airpress {
 
 
    		$keys = explode("|", $a["field"]);
+   		$values = array();
 
-   		if ( isset($this->currentRecord) ){
+   		if ( ! empty($this->loopScope) ){
+
+   			$scope = ( is_null($a["loopscope"]) )? 0 : count($this->loopScope) - $a["loopscope"] - 1;
+
+   			airpress_debug(0,"asking for $field_name: ".$scope." of ".count($this->loopScope));
+
    			$field = array_shift($keys);
-			$collection = $this->currentRecord[$field];
+
+   			if ( is_string($this->loopScope[$scope][$field]) ){
+
+   				$values = array($this->loopScope[$scope][$field]);
+
+   			} else if ( is_array($this->loopScope[$scope][$field]) ){
+
+	   			// If the intended field is an attachment, then can't treat as collection
+	   			if ( isset($this->loopScope[$scope][$field][$scope]["url"]) ){
+
+					$values = array();
+					foreach( $this->loopScope[$scope][$field] as $attachment ){
+						$values[] = airpress_getArrayValue($attachment,$keys);
+					}
+
+				} else {
+					$values = airpress_getArrayValue($this->loopScope[$scope][$field],$keys);
+				}
+
+   			} else if ( is_airpress_collection($this->loopScope[$scope][$field]) ){
+   				
+   				$collection = $this->loopScope[$scope][$field];
+
+   				if ( ! is_airpress_empty($collection) ){
+					$values = $collection->getFieldValues($keys);
+   				}
+
+   			}
+
    		} else {
-			$collection = $post->AirpressCollection;
+   			$collection = $post->AirpressCollection;
+			$values = $collection->getFieldValues($keys);
    		}
 
 		$output = "";
 
-		if ( ! is_airpress_empty($collection) ){
-
-			$values = $collection->getFieldValues($keys);
+		if ( ! is_null($values) ){
 
 			if (isset($a["format"])){
 

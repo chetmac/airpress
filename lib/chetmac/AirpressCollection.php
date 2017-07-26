@@ -231,6 +231,16 @@ class AirpressCollection extends ArrayObject {
 						$values = array_unique(array_merge($values, $record[$field]->getFieldValues($keys) ) );
 					}
 
+				// Is this an array of images/attachments?
+				} else if ( is_array($record[$field]) && isset($record[$field][0]["url"]) ){
+
+					$attachment_values = array();
+					foreach( $record[$field] as $attachment ){
+						$attachment_values[] = airpress_getArrayValue($attachment,$keys);
+					}
+
+					$values = array_merge($values, $attachment_values );
+
 				// Is this field an Array
 				} else if (is_array($record[$field])){
 
@@ -248,7 +258,7 @@ class AirpressCollection extends ArrayObject {
 						}
 
 					} else {
-						$values = array_unique(array_merge($values, $this->getArrayValue($record[$field],$keys) ) );
+						$values = array_merge($values, airpress_getArrayValue($record[$field],$keys) );
 					}
 
 				// Is this a string or somthing?
@@ -268,27 +278,27 @@ class AirpressCollection extends ArrayObject {
 		return $values;
 	}
 
-	function getArrayValue($array,$keys){
-		while(!empty($keys)){
-			$key = array_shift($keys);
+	// function getArrayValue($array,$keys){
+	// 	while(!empty($keys)){
+	// 		$key = array_shift($keys);
 
-			if (isset($array[$key])){
-				$array = $array[$key];
-			} else {
-				// Maybe it's an array of arrays
-				$return_array = array();
-				foreach($array as $item){
-					if ( isset($item[$key]) ){
-						$return_array[] = $item[$key];
-					}
-				}
-				if ( ! empty($return_array) ){
-					$array = $return_array;
-				}
-			}
-		}
-		return $array;
-	}
+	// 		if (isset($array[$key])){
+	// 			$array = $array[$key];
+	// 		} else {
+	// 			// Maybe it's an array of arrays
+	// 			$return_array = array();
+	// 			foreach($array as $item){
+	// 				if ( isset($item[$key]) ){
+	// 					$return_array[] = $item[$key];
+	// 				}
+	// 			}
+	// 			if ( ! empty($return_array) ){
+	// 				$array = $return_array;
+	// 			}
+	// 		}
+	// 	}
+	// 	return $array;
+	// }
 
 	public function setRecords($records=array()){
 		// empty collection first
