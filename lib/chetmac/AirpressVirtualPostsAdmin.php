@@ -120,6 +120,7 @@ function airpress_admin_vp_tab($key,$config) {
 		"pattern"		=> "^folder/([^/]+)/?$",
 		"default"		=> "folder/my-unique-identifier/",
 		"formula"		=> "{Your Airtable Field} = '$1'",
+		"sort"			=> "Your Airtable Field",
 		"table"			=> "Your Airtable Table",
 		"field"			=> "Your Airtable Field",
 		"field2"		=> "Your Airtable Field2",
@@ -177,6 +178,11 @@ function airpress_admin_vp_tab($key,$config) {
 	################################
 	$field_name = "formula";
 	$field_title = "Filter by formula";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+
+	################################
+	$field_name = "sort";
+	$field_title = "Sort results";
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################

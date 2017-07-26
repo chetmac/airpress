@@ -145,6 +145,11 @@ class AirpressVirtualPosts {
 
 			$query->filterByFormula($formula);
 
+			// Handle sort parameter
+			if (isset($this->config["sort"]) && !empty($this->config["sort"])){
+				$query->sort($this->config["sort"]);
+			}
+
 			if ( $simulation ){
 				$query->fields(array()); // specify no fields so this is as quick as possible
 			} else {

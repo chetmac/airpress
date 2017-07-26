@@ -213,7 +213,7 @@ class Airpress {
 	    	$query->view($a["view"]);
 
 	    if (isset($a["sort"]))
-	    	$query->view($a["sort"]);
+	    	$query->sort($a["sort"]);
 
 	    if (isset($a["maxrecords"]))
 	    	$query->maxRecords($a["maxrecords"]);
