@@ -69,36 +69,42 @@ function airpress_vp_render( $active_tab = '' ) {
 <?php
 }
 
-function airpress_admin_vp_tab_controller(){
-	if (isset($_GET["page"]) && $_GET["page"] != "airpress_vp"){
-		return;
-	}
+// function airpress_admin_vp_tab_controller(){
+	
+// 	if ( // Verify that we're dealing with Airpress
+// 		( ! isset($_GET["page"]) && ! isset($_POST["option_page"]) ) ||
+// 		( isset($_GET["page"]) && strpos($_GET["page"],"airpress_vp") === false ) || 
+// 		( isset($_POST["option_page"]) && strpos($_POST["option_page"],"airpress_vp") === false )
+// 	){
+// 		// none of our business!		
+// 		return;
+// 	}
 
-	if (isset($_GET["delete"]) && $_GET["delete"] == "true"){
-		delete_airpress_config("airpress_vp",$_GET['tab']);
-		header("Location: ".admin_url("/admin.php?page=airpress_vp"));
-		exit;
-	} else {
-		$configs = get_airpress_configs("airpress_vp",false);
-		$requested_tab = (isset($_GET['tab']))? $_GET['tab'] : 0;
-	}
+// 	if (isset($_GET["delete"]) && $_GET["delete"] == "true"){
+// 		delete_airpress_config("airpress_vp",$_GET['tab']);
+// 		header("Location: ".admin_url("/admin.php?page=airpress_vp"));
+// 		exit;
+// 	} else {
+// 		$configs = get_airpress_configs("airpress_vp",false);
+// 		$requested_tab = (isset($_GET['tab']))? $_GET['tab'] : 0;
+// 	}
 
-	if (empty($configs) || !isset($configs[$requested_tab])){
-		$config = array("name" => "New Configuration");
-		$configs[] = $config;
-		$active_tab = count($configs)-1;
-		set_airpress_config("airpress_vp",$active_tab,$config);		
-	} else {
-		$active_tab = $requested_tab;
-	}
+// 	if (empty($configs) || !isset($configs[$requested_tab])){
+// 		$config = array("name" => "New Configuration");
+// 		$configs[] = $config;
+// 		$active_tab = count($configs)-1;
+// 		set_airpress_config("airpress_vp",$active_tab,$config);		
+// 	} else {
+// 		$active_tab = $requested_tab;
+// 	}
 
-	$_GET['tab'] = $active_tab;
+// 	$_GET['tab'] = $active_tab;
 
-	foreach($configs as $key => $config){
-		airpress_admin_vp_tab($key,$config);
-	}
-}
-add_action( 'admin_init', 'airpress_admin_vp_tab_controller');
+// 	foreach($configs as $key => $config){
+// 		airpress_admin_vp_tab($key,$config);
+// 	}
+// }
+// add_action( 'admin_init', 'airpress_admin_vp_tab_controller');
 
 /***********************************************/
 # TAB: DEFAULT
@@ -111,8 +117,8 @@ function airpress_admin_vp_tab($key,$config) {
 	$defaults = array(
 		"name"			=> "New Configuration",
 		"connection"	=> null,
-		"pattern"		=> "^folder/(.*)",
-		"default"		=> "folder/my-unique-identifier",
+		"pattern"		=> "^folder/([^/]+)/?$",
+		"default"		=> "folder/my-unique-identifier/",
 		"formula"		=> "{Your Airtable Field} = '$1'",
 		"table"			=> "Your Airtable Table",
 		"field"			=> "Your Airtable Field",
@@ -161,7 +167,7 @@ function airpress_admin_vp_tab($key,$config) {
 	################################
 	$field_name = "pattern";
 	$field_title = "URL Pattern to Match";
-	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_regex', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################
 	$field_name = "default";
@@ -252,6 +258,17 @@ function airpress_admin_vp_render_element_text($args) {
 	$field_name = $args[2];
 
 	echo '<input type="text" id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']" value="' . $options[$field_name] . '" />';
+}
+
+function airpress_admin_vp_render_element_regex($args) {
+	$options = $args[0];
+	$option_name = $args[1];
+	$field_name = $args[2];
+
+	echo '<input type="text" id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']" value="' . $options[$field_name] . '" />';
+
+	echo "<br>";
+	echo "<p>To experiment with more about creating patterns, visit ... ";
 }
 
 function airpress_admin_vp_render_element_test($args) {

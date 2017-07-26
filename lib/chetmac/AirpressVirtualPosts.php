@@ -96,7 +96,7 @@ class AirpressVirtualPosts {
 		}
 
 		// populate $matches var to save parts of the request string
-		preg_match("/" . str_replace("/", "\/", $request->matched_rule) . "/", $request->request,$this->matches);
+		preg_match("`" . $request->matched_rule . "`", $request->request, $this->matches);
 
 		// If request is empty, then the home page was requested
 		// and we're not going to allow home page to be virtual at this time...

@@ -67,36 +67,42 @@ function airpress_vf_render( $active_tab = '' ) {
 <?php
 }
 
-function airpress_admin_vf_tab_controller(){
-	if (isset($_GET["page"]) && $_GET["page"] != "airpress_vf"){
-		return;
-	}
+// function airpress_admin_vf_tab_controller(){
+		
+// 	if ( // Verify that we're dealing with Airpress
+// 		( ! isset($_GET["page"]) && ! isset($_POST["option_page"]) ) ||
+// 		( isset($_GET["page"]) && strpos($_GET["page"],"airpress_vf") === false ) || 
+// 		( isset($_POST["option_page"]) && strpos($_POST["option_page"],"airpress_vf") === false )
+// 	){
+// 		// none of our business!		
+// 		return;
+// 	}
 
-	if (isset($_GET["delete"]) && $_GET["delete"] == "true"){
-		delete_airpress_config("airpress_vf",$_GET['tab']);
-		header("Location: ".admin_url("/admin.php?page=airpress_vf"));
-		exit;
-	} else {
-		$configs = get_airpress_configs("airpress_vf",false);
-		$requested_tab = (isset($_GET['tab']))? $_GET['tab'] : 0;
-	}
+// 	if (isset($_GET["delete"]) && $_GET["delete"] == "true"){
+// 		delete_airpress_config("airpress_vf",$_GET['tab']);
+// 		header("Location: ".admin_url("/admin.php?page=airpress_vf"));
+// 		exit;
+// 	} else {
+// 		$configs = get_airpress_configs("airpress_vf",false);
+// 		$requested_tab = (isset($_GET['tab']))? $_GET['tab'] : 0;
+// 	}
 
-	if (empty($configs) || !isset($configs[$requested_tab])){
-		$config = array("name" => "New Configuration");
-		$configs[] = $config;
-		$active_tab = count($configs)-1;
-		set_airpress_config("airpress_vf",$active_tab,$config);		
-	} else {
-		$active_tab = $requested_tab;
-	}
+// 	if (empty($configs) || !isset($configs[$requested_tab])){
+// 		$config = array("name" => "New Configuration");
+// 		$configs[] = $config;
+// 		$active_tab = count($configs)-1;
+// 		set_airpress_config("airpress_vf",$active_tab,$config);		
+// 	} else {
+// 		$active_tab = $requested_tab;
+// 	}
 
-	$_GET['tab'] = $active_tab;
+// 	$_GET['tab'] = $active_tab;
 
-	foreach($configs as $key => $config){
-		airpress_admin_vf_tab($key,$config);
-	}
-}
-add_action( 'admin_init', 'airpress_admin_vf_tab_controller');
+// 	foreach($configs as $key => $config){
+// 		airpress_admin_vf_tab($key,$config);
+// 	}
+// }
+// add_action( 'admin_init', 'airpress_admin_vf_tab_controller');
 
 /***********************************************/
 # TAB: DEFAULT

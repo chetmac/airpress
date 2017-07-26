@@ -132,16 +132,26 @@ function airpress_cx_render( $active_tab = '' ) {
 }
 
 function airpress_admin_cx_tab_controller(){
-	if (isset($_GET["page"]) && $_GET["page"] != "airpress_cx"){
+
+	$airpress_config_initials = false;
+
+	if ( isset($_GET["page"]) && preg_match("/^airpress_(..)$/",$_GET["page"],$matches) ){
+		$airpress_config_initials = $matches[1];
+	} else if ( isset($_POST["option_page"]) && preg_match("/^airpress_(..).*$/",$_POST["option_page"],$matches) ){
+		$airpress_config_initials = $matches[1];
+	}
+	
+	if ( ! $airpress_config_initials ){
+		// none of our business!		
 		return;
 	}
 
 	if (isset($_GET["delete"]) && $_GET["delete"] == "true"){
-		delete_airpress_config("airpress_cx",$_GET['tab']);
-		header("Location: ".admin_url("/admin.php?page=airpress_cx"));
+		delete_airpress_config("airpress_".$airpress_config_initials,$_GET['tab']);
+		header("Location: ".admin_url("/admin.php?page=airpress_".$airpress_config_initials));
 		exit;
 	} else {
-		$configs = get_airpress_configs("airpress_cx",false);
+		$configs = get_airpress_configs("airpress_".$airpress_config_initials,false);
 		$requested_tab = (isset($_GET['tab']))? $_GET['tab'] : 0;
 	}
 
@@ -149,7 +159,7 @@ function airpress_admin_cx_tab_controller(){
 		$config = array("name" => "New Configuration");
 		$configs[] = $config;
 		$active_tab = count($configs)-1;
-		set_airpress_config("airpress_cx",$active_tab,$config);		
+		set_airpress_config("airpress_".$airpress_config_initials,$active_tab,$config);		
 	} else {
 		$active_tab = $requested_tab;
 	}
@@ -157,7 +167,8 @@ function airpress_admin_cx_tab_controller(){
 	$_GET['tab'] = $active_tab;
 
 	foreach($configs as $key => $config){
-		airpress_admin_cx_tab($key,$config);
+		$function = "airpress_admin_".$airpress_config_initials."_tab";
+		call_user_func($function,$key,$config);
 	}
 }
 add_action( 'admin_init', 'airpress_admin_cx_tab_controller');
