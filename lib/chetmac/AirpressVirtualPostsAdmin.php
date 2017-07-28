@@ -274,7 +274,7 @@ function airpress_admin_vp_render_element_regex($args) {
 	echo '<input type="text" id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']" value="' . $options[$field_name] . '" />';
 
 	echo "<br>";
-	echo "<p>To experiment with more about creating patterns, visit ... ";
+	echo "<p>To experiment with more about creating patterns, visit https://regex101.com/ — Please note that Airpress does NOT need front-slashes escaped.</p>";
 }
 
 function airpress_admin_vp_render_element_test($args) {

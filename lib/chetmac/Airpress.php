@@ -330,7 +330,14 @@ class Airpress {
 
    		} else {
    			$collection = $post->AirpressCollection;
-			$values = $collection->getFieldValues($keys);
+
+   			if ( is_airpress_collection($collection) ){
+				$values = $collection->getFieldValues($keys);
+   			} else {
+   				airpress_debug(0,"[apr field='".$field_name."'] attempting to be used on a page where there is no collection.",$collection);
+   				return "[apr field='".$field_name."'] attempting to be used on a page where there is no collection.";
+   			}
+			
    		}
 
 		$output = "";
