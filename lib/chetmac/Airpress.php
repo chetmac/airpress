@@ -190,6 +190,11 @@ class Airpress {
 	    	return null;
 	    }
 
+		if ( ! empty($this->loopScope) ){
+			airpress_debug(0,"CANNOT POPULATE inside of apr_loop. Move all apr_populate shortcodes to the top of your content.");
+			return "apr_populate must not be called prior to any apr_loop, as apr_populate recursively populates records.";
+		}
+
 	    $keys = explode("|", $a["field"]);
 
 		// Gather IDs

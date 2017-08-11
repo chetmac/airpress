@@ -228,7 +228,8 @@ class AirpressCollection extends ArrayObject {
 						$values = array_merge($values,(array)$record[$field]);
 					} else {
 						// ask the collection for the values for the next set of keys
-						$values = array_unique(array_merge($values, $record[$field]->getFieldValues($keys) ) );
+						$result = $record[$field]->getFieldValues($keys);
+						$values = array_merge($values, $record[$field]->getFieldValues($keys) );
 					}
 
 				// Is this an array of images/attachments?
@@ -252,7 +253,7 @@ class AirpressCollection extends ArrayObject {
 							is_string($record[$field][0]) && 
 							substr($record[$field][0],0,3) == "rec"
 						){
-							$values = array_unique(array_merge($values,$record[$field]));
+							$values = array_merge($values,$record[$field]);
 						} else {
 							$values = array_merge($values,$record[$field]);							
 						}
@@ -275,6 +276,25 @@ class AirpressCollection extends ArrayObject {
 			}
 		}
 		
+		// array_unique is pointless and even dangerous when run on multi-dimensional
+		// arrays and objects. The only real point to using array_unique to begin with
+		// is to respect the intent of getFieldValues—which is to follow a key path
+		// such as District|Cuisine|Name for multiple Restaurant records and return an
+		// array of those values. In this example, we don't want duplicate cuisine names!
+
+		// This is especially true when the key path (District|Cuisines) would only return
+		// arrays of RECORD_IDs for a variety of Cuisine records. Since this function is used
+		// to build a HIGHLY optimized API request to Airtable, I don't want to ask for the same
+		// record more than one by sending duplicate RECORD_IDs in the filterByFormula.
+
+		// However, if I've already populated the districts and cuisines for a given set of 
+		// restaurants then the key path (District|Cuisines) would return the records, not
+		// the record IDs—so running array unique on THOSE results are bad/unpredictable.
+
+		if ( isset($values[0]) && ! is_object($values[0]) && ! is_array($values[0]) ){
+			$values = array_unique($values);
+		}
+
 		return $values;
 	}
 

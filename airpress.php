@@ -154,6 +154,11 @@ function is_airpress_force_fresh($config=0){
 }
 
 function airpress_getArrayValue($array,$keys){
+	// for backwards compatibility
+	return airpress_getArrayValues();
+}
+
+function airpress_getArrayValues($array,$keys){
 	while(!empty($keys)){
 		$key = array_shift($keys);
 
