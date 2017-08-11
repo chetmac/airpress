@@ -237,7 +237,7 @@ class AirpressCollection extends ArrayObject {
 
 					$attachment_values = array();
 					foreach( $record[$field] as $attachment ){
-						$attachment_values[] = airpress_getArrayValue($attachment,$keys);
+						$attachment_values[] = airpress_getArrayValues($attachment,$keys);
 					}
 
 					$values = array_merge($values, $attachment_values );
@@ -259,7 +259,7 @@ class AirpressCollection extends ArrayObject {
 						}
 
 					} else {
-						$values = array_merge($values, airpress_getArrayValue($record[$field],$keys) );
+						$values = array_merge($values, airpress_getArrayValues($record[$field],$keys) );
 					}
 
 				// Is this a string or somthing?

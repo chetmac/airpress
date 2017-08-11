@@ -316,11 +316,11 @@ class Airpress {
 
 					$values = array();
 					foreach( $this->loopScope[$scope][$field] as $attachment ){
-						$values[] = airpress_getArrayValue($attachment,$keys);
+						$values[] = airpress_getArrayValues($attachment,$keys);
 					}
 
 				} else {
-					$values = airpress_getArrayValue($this->loopScope[$scope][$field],$keys);
+					$values = airpress_getArrayValues($this->loopScope[$scope][$field],$keys);
 				}
 
    			} else if ( is_airpress_collection($this->loopScope[$scope][$field]) ){

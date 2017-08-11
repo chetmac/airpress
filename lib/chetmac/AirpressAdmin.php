@@ -39,22 +39,8 @@ function airpress_db_render( $active_tab = '' ) {
 
 	if (isset($_GET["delete-expired-transients"]) && $_GET["delete-expired-transients"] == "true"){
 
-		$to_delete = array();
-		$expirations = $wpdb->get_results( 'SELECT * FROM wp_options WHERE option_name LIKE "_transient_timeout_aprq_%" ORDER BY option_value ASC', OBJECT );
-
-		$exp = array();
-		foreach($expirations as $row){
-			$hash = str_replace("_transient_timeout_aprq_","",$row->option_name);
-			if (time() >= $row->option_value || ( isset($_GET["all"]) && $_GET["all"] == "true") ){
-				$to_delete[] = "_transient_timeout_aprq_".$hash;
-				$to_delete[] = "_transient_aprq_".$hash;
-			}
-		}
-
-		if (!empty($to_delete)){
-			$in = '"'.implode('","', $to_delete).'"';
-			$wpdb->get_results( 'DELETE FROM wp_options WHERE option_name IN ('.$in.')', OBJECT );
-		}
+		$all = isset($_GET["all"]) && $_GET["all"] === "true";
+		airpress_flush_cache( $all );
 
 	}
 

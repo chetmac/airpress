@@ -3,7 +3,7 @@
 Plugin Name: Airpress
 Plugin URI: http://chetmac.com/airpress
 Description: Extend Wordpress Posts, Pages, and Custom Fields with data from remote Airtable records.
-Version: 1.1.38
+Version: 1.1.39
 Author: Chester McLaughlin
 Author URI: http://chetmac.com
 License: GPLv2 or later
@@ -155,7 +155,7 @@ function is_airpress_force_fresh($config=0){
 
 function airpress_getArrayValue($array,$keys){
 	// for backwards compatibility
-	return airpress_getArrayValues();
+	return airpress_getArrayValues($array,$keys);
 }
 
 function airpress_getArrayValues($array,$keys){
@@ -178,6 +178,29 @@ function airpress_getArrayValues($array,$keys){
 		}
 	}
 	return $array;
+}
+
+function airpress_flush_cache($all=false){
+
+	global $wpdb;
+
+	$to_delete = array();
+	$expirations = $wpdb->get_results( 'SELECT * FROM wp_options WHERE option_name LIKE "_transient_timeout_aprq_%" ORDER BY option_value ASC', OBJECT );
+
+	$exp = array();
+	foreach($expirations as $row){
+		$hash = str_replace("_transient_timeout_aprq_","",$row->option_name);
+		if (time() >= $row->option_value || $all === true ){
+			$to_delete[] = "_transient_timeout_aprq_".$hash;
+			$to_delete[] = "_transient_aprq_".$hash;
+		}
+	}
+
+	if (!empty($to_delete)){
+		$in = '"'.implode('","', $to_delete).'"';
+		$wpdb->get_results( 'DELETE FROM wp_options WHERE option_name IN ('.$in.')', OBJECT );
+	}
+
 }
 
 function airpress_debug($cx=0,$message=null,$object=null){

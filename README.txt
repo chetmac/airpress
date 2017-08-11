@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.8
-Stable tag: 1.1.38
+Stable tag: 1.1.39
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,12 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.39 =
+* Added error message when attempting to use apr_populate inside an apr_loop
+* Fixed error message on Airpress->Debug Info admin page (thanks @@magisterravn)
+* Added option to completely empty cache to Airpress->Debug Info admin page
+* Added airpress_flush_cache for those who want a nuclear option. Remember that if you only want to flush the cache for requests specific to a certain page/URL, you can simply append ?fresh=true (or whatever you've configured) to the URL.
 
 = 1.1.38 =
 * Fixed fatal error when using Airpress [apr] shortcode on a page without VirtualFields or VirtualPosts (no AirpressCollection). Thanks @mazoola
