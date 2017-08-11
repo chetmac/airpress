@@ -141,7 +141,7 @@ function airpress_admin_cx_tab_controller(){
 		$airpress_config_initials = $matches[1];
 	}
 	
-	if ( ! $airpress_config_initials ){
+	if ( ! $airpress_config_initials || $airpress_config_initials == "db"){
 		// none of our business!		
 		return;
 	}
