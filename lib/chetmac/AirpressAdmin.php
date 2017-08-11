@@ -45,7 +45,7 @@ function airpress_db_render( $active_tab = '' ) {
 		$exp = array();
 		foreach($expirations as $row){
 			$hash = str_replace("_transient_timeout_aprq_","",$row->option_name);
-			if (time() >= $row->option_value){
+			if (time() >= $row->option_value || ( isset($_GET["all"]) && $_GET["all"] == "true") ){
 				$to_delete[] = "_transient_timeout_aprq_".$hash;
 				$to_delete[] = "_transient_aprq_".$hash;
 			}
@@ -83,7 +83,8 @@ function airpress_db_render( $active_tab = '' ) {
 		}
 	?>
 	<br><br>
-	<a href="<?php echo admin_url("admin.php?page=airpress_db&delete-expired-transients=true"); ?>">Delete Expired Transients?</a>
+	<a href="<?php echo admin_url("admin.php?page=airpress_db&delete-expired-transients=true"); ?>">Delete Expired Transients?</a><br>
+	<a href="<?php echo admin_url("admin.php?page=airpress_db&delete-expired-transients=true&all=true"); ?>">Delete All Transients (completely clear cache)?</a>
 	</div>
 	<?php
 }
