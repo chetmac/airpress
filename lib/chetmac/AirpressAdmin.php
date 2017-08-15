@@ -6,7 +6,7 @@ function airpress_cx_menu() {
 	add_menu_page(
 		'just a redirect',	// page title
 		'Airpress',			// menu title
-		'administrator',		// capabilities
+		'manage_options',		// capabilities
 		'airpress_settings',	// menu ID
 		'airpress_admin_render'	// function that renders
 	);
@@ -15,7 +15,7 @@ function airpress_cx_menu() {
 		"airpress_settings", // parent slug
 		"Airtable Connections", // page title
 		"Airtable Connections", // menu title
-		"administrator", // capability
+		"manage_options", // capability
 		"airpress_cx", // menu_slug
 		"airpress_cx_render" // function
 	);
@@ -24,7 +24,7 @@ function airpress_cx_menu() {
 		"airpress_settings", // parent slug
 		"Debug Info", // page title
 		"Debug Info", // menu title
-		"administrator", // capability
+		"manage_options", // capability
 		"airpress_db", // menu_slug
 		"airpress_db_render" // function
 	);

@@ -6,7 +6,7 @@ function airpress_vf_menu() {
 		"airpress_settings", // parent slug
 		"Virtual Fields", // page title
 		"Virtual Fields", // menu title
-		"administrator", // capability
+		"manage_options", // capability
 		"airpress_vf", // menu_slug
 		"airpress_vf_render" // function
 	);

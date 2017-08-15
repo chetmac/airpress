@@ -6,7 +6,7 @@ function airpress_vp_menu() {
 		"airpress_settings", // parent slug
 		"Virtual Posts", // page title
 		"Virtual Posts", // menu title
-		"administrator", // capability
+		"manage_options", // capability
 		"airpress_vp", // menu_slug
 		"airpress_vp_render" // function
 	);
