@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.8
-Stable tag: 1.1.40
+Stable tag: 1.1.41
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.41 =
+* Removed passing arguments by reference for is_airpress_empty, is_airpress_record, is_airpress_collection because it was creating a null item in the arrayobject of some empty AirpressCollections.
 
 = 1.1.40 =
 * Changed capabilities required to manage Airpress options from administrator to manage_options.
