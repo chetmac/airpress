@@ -16,6 +16,8 @@ add_action( 'admin_menu', 'airpress_vp_menu' );
 
 add_action( 'init', "airpress_vp_add_rules" );
 
+airpress_debug(0,"These are all teh hooks",$wp_filter);
+
 //add_action('rewrite_rules_array','airpress_vp_update_permalinks');
 //permalink_structure_changed
 //generate_rewrite_rules
@@ -120,7 +122,7 @@ function airpress_admin_vp_tab($key,$config) {
 		"pattern"		=> "^folder/([^/]+)/?$",
 		"default"		=> "folder/my-unique-identifier/",
 		"formula"		=> "{Your Airtable Field} = '$1'",
-		"sort"			=> "Your Airtable Field",
+		"sort"			=> "",
 		"table"			=> "Your Airtable Table",
 		"field"			=> "Your Airtable Field",
 		"field2"		=> "Your Airtable Field2",
@@ -217,6 +219,10 @@ function airpress_vp_validation($config){
 	// global $wp_rewrite;
 	// airpress_vp_add_rule($config);
 	// $wp_rewrite->flush_rules();
+
+	if ( isset($config["sort"]) && $config["sort"] == "Your Airtable Field"){
+		$config["sort"] = "";
+	}
 
 	return $config;
 }
