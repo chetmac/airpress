@@ -7,6 +7,7 @@ class Airpress {
 	public $debug_output;
 	private $loopScope;
 	public $debug_stats;
+	private $loopcount;
 
 	private $deferred_queries;
 
@@ -35,6 +36,9 @@ class Airpress {
 		add_shortcode( 'apr_loop', array($this,'shortcode_loop') );
 		for($i=0;$i<=10;$i++){
 			add_shortcode( 'apr_loop'.$i, array($this,'shortcode_loop') );
+
+		// loop counter
+		add_shortcode( 'apr_loopctr', array($this,'shortcode_loopctr') );
 		}
 
 		add_action( 'wp_footer', array($this,'renderDebugOutput') );
@@ -87,7 +91,14 @@ class Airpress {
 	    $replacementFields = array_unique($matches[1]);
 
 	    $output = "";
+
+		if (! isset($this->loopcount[$tag])){
+			$this->loopcount[$tag] = 0;
+		}
+
 	    foreach($records_to_loop as $record){
+
+		$this->loopcount[$tag]++;
 
 	    	// place current record at ZERO
 	    	array_unshift($this->loopScope,$record);
@@ -158,6 +169,8 @@ class Airpress {
 	    	array_shift($this->loopScope);
 	    }
 
+		unset($this->loopcount[$tag]);
+
 	    return $output;
 	}
 
@@ -226,6 +239,28 @@ class Airpress {
 		// $subCollection = new AirpressCollection($query);
 		// $collection->setFieldValues($keys,$subCollection,$query);
 
+	}
+
+	public function shortcode_loopctr($atts, $content=null, $tag) {
+
+	    $a = shortcode_atts( array(
+			'loop'	=> null,
+			'start'	=> null,
+	    ), $atts );
+
+		if (isset($a["loop"])) {
+			if (! strpos($a["loop"],"apr_") === 0) {
+				$a["loop"] = "apr_" . $a["loop"];
+			}
+		} else {
+			$a["loop"] = "apr_loop";
+		}
+		if (isset($this->loopcount[$a["loop"]])) {
+			if (isset($a["start"])) {
+				return $this->loopcount[$a["loop"]] + ($a["start"] - 1);
+			}
+			return $this->loopcount[$a["loop"]];
+		}
 	}
 
 	public function shortcode_include($atts, $content=null, $tag){
