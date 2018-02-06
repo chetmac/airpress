@@ -87,6 +87,7 @@ class Airpress {
 	    $replacementFields = array_unique($matches[1]);
 
 	    $output = "";
+
 	    foreach($records_to_loop as $record){
 
 	    	// place current record at ZERO
@@ -96,7 +97,6 @@ class Airpress {
 	    	// By doing the shortcodes BEFORE any processing, we're ensuring that
 	    	// any nested loops ... or innermost loops are processed prior to outter most loops.
 	    	// if we don't do this all {{variables}} will be replaced by outter most loops.
-
 	    	$template = do_shortcode($content);
 
 	    	foreach($replacementFields as $replacementField){
@@ -157,8 +157,8 @@ class Airpress {
 	    	// Take current record back off scope stack
 	    	array_shift($this->loopScope);
 	    }
-
-	    return $output;
+	    
+	    return preg_replace("`(<br />\n)+`","<br />\n",$output);
 	}
 
 	public function shortcode_populate($atts, $content=null, $tag){
@@ -280,6 +280,7 @@ class Airpress {
 			'wrapper'			=> null,
 			'single'			=> null,
 			'rollup'			=> null,
+			'condition'			=> null,
 			'default'			=> null,
 			'format'			=> null,
 			'loopscope'			=> null,
@@ -290,60 +291,93 @@ class Airpress {
 
 	    $single = (!isset($a["single"]) || strtolower($a["single"]) == "false")? false : true;
 
+	    $condition = ( isset($a["condition"]) )? $a["condition"] : false;
+
 		$recordTemplate = (isset($a["recordtemplate"]))? $a["recordtemplate"] : "%s\n";
 		$relatedTemplate = (isset($a["relatedtemplate"]))? $a["relatedtemplate"] : "%s\n";
-
 
    		$keys = explode("|", $a["field"]);
    		$values = array();
 
+   		$condition_match = true;
+
    		if ( ! empty($this->loopScope) ){
 
-   			$scope = ( is_null($a["loopscope"]) )? 0 : count($this->loopScope) - $a["loopscope"] - 1;
+   			$scope = ( is_null($a["loopscope"]) ) ? 0 : count($this->loopScope) - $a["loopscope"] - 1;
 
    			airpress_debug(0,"asking for $field_name: ".$scope." of ".count($this->loopScope));
 
    			$field = array_shift($keys);
+   			
+   			if ( $condition && ( empty($keys) || is_airpress_attachment($this->loopScope[$scope][$field]) ) ){
 
-   			if ( is_string($this->loopScope[$scope][$field]) ){
+				list($condition_field,$condition_value) = explode("|",$condition);
+				if ( $this->loopScope[$scope][$condition_field] != $condition_value){
+					$condition_match = false;
+				}
+			}
 
-   				$values = array($this->loopScope[$scope][$field]);
+			if ( $condition_match ):
 
-   			} else if ( is_array($this->loopScope[$scope][$field]) ){
+	   			if ( is_string($this->loopScope[$scope][$field]) ){
 
-	   			// If the intended field is an attachment, then can't treat as collection
-	   			if ( isset($this->loopScope[$scope][$field][$scope]["url"]) ){
-
-					$values = array();
-					foreach( $this->loopScope[$scope][$field] as $attachment ){
-						$values[] = airpress_getArrayValues($attachment,$keys);
+					if ( $condition ){
+						list($condition_field,$condition_value) = explode("|",$condition);
+						if ( $this->loopScope[$scope][$condition_field] == $condition_value){
+							$values = array($this->loopScope[$scope][$field]);
+						}
+					} else {
+	   					$values = array($this->loopScope[$scope][$field]);
 					}
 
-				} else {
-					$values = airpress_getArrayValues($this->loopScope[$scope][$field],$keys);
-				}
+	   			} else if ( is_array($this->loopScope[$scope][$field]) ){
 
-   			} else if ( is_airpress_collection($this->loopScope[$scope][$field]) ){
-   				
-   				$collection = $this->loopScope[$scope][$field];
+		   			// If the intended field is an attachment, then can't treat as collection
+		   			if ( is_airpress_attachment($this->loopScope[$scope][$field]) ){
 
-   				if ( ! is_airpress_empty($collection) ){
-					$values = $collection->getFieldValues($keys);
-   				}
+						$values = array();
+						foreach( $this->loopScope[$scope][$field] as $attachment ){
+							$values[] = airpress_getArrayValues($attachment,$keys);
+						}
 
-   			}
+					} else {
+						$values = airpress_getArrayValues($this->loopScope[$scope][$field],$keys);
+					}
+
+	   			} else if ( is_airpress_collection($this->loopScope[$scope][$field]) ){
+	   				
+	   				$collection = $this->loopScope[$scope][$field];
+
+	   				if ( ! is_airpress_empty($collection) ){
+						$values = $collection->getFieldValues($keys,$condition);
+	   				}
+
+	   			}
+
+	   		endif;
 
    		} else {
    			$collection = $post->AirpressCollection;
 
    			if ( is_airpress_collection($collection) ){
-				$values = $collection->getFieldValues($keys);
+				$values = $collection->getFieldValues($keys,$condition);
    			} else {
    				airpress_debug(0,"[apr field='".$field_name."'] attempting to be used on a page where there is no collection.",$collection);
    				return "[apr field='".$field_name."'] attempting to be used on a page where there is no collection.";
    			}
 			
    		}
+
+   		// when a condition is set, we don't want to show a bunch of empty rows output
+   		// for all the unmet conditions.
+		if ( $condition ){
+
+			$values = array_filter($values, create_function('$value', 'return $value !== "";'));
+			if ( empty($values)){
+				$values = null;
+			}
+
+		}
 
 		$output = "";
 

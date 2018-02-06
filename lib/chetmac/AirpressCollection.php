@@ -202,7 +202,7 @@ class AirpressCollection extends ArrayObject {
 		}
 	}
 
-	public function getFieldValues($keys){
+	public function getFieldValues($keys,$condition=false){
 		global $airpress;
 		$values = array();
 
@@ -214,6 +214,18 @@ class AirpressCollection extends ArrayObject {
 		}
 
 		foreach($this as $record){
+
+			// If we're at the last key in the dot notation (foo.bar.this.that)
+			// or if we're descending into an attachment field, then assess the
+			// condition
+
+			if ( $condition && ( empty($keys) || is_airpress_attachment($record[$field]) ) ){
+				list($condition_field,$condition_value) = explode("|",$condition);
+				if ( $record[$condition_field] != $condition_value){
+					continue;
+				}
+			}
+
 			//airpress_debug(0,"field: $field");
 			if (strtolower($field) == "record_id"){
 				$values[] = $record->record_id();
@@ -233,7 +245,7 @@ class AirpressCollection extends ArrayObject {
 					}
 
 				// Is this an array of images/attachments?
-				} else if ( is_array($record[$field]) && isset($record[$field][0]["url"]) ){
+				} else if ( is_airpress_attachment($record[$field]) ){
 
 					$attachment_values = array();
 					foreach( $record[$field] as $attachment ){

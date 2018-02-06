@@ -3,8 +3,8 @@ Contributors: chetmac
 Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
-Tested up to: 4.8
-Stable tag: 1.1.42
+Tested up to: 4.9.4
+Stable tag: 1.1.43
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.43 =
+* Added attribute "condition" to [apr field=""]. Allows targeting of specific record/row when VirtualFields or VirtualPosts retrieve more than one record. Example usage would be: [apr field="Name" condition="Test Column|specific value"]
 
 = 1.1.42 =
 * Removed default value for VirualPost configuration "sort" field. It was causing Airtable API requests to respond with 422 "Unprocessable Entity" response (because it was not a valid field) with created 404's (as no records were returned). Thanks @mazoola

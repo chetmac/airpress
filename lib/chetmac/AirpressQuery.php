@@ -572,7 +572,7 @@ class AirpressQuery {
 					// look for it inside each record of our result set
 					foreach($records as &$record):$r = &$record["fields"];
 
-						if ( !isset($r[$field][0]["url"]) ){
+						if ( ! is_airpress_attachment($r[$field]) ){
 							// is either an empty image field or not an image field
 							continue;
 						}
