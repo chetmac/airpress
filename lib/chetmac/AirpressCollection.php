@@ -241,7 +241,7 @@ class AirpressCollection extends ArrayObject {
 					} else {
 						// ask the collection for the values for the next set of keys
 						$result = $record[$field]->getFieldValues($keys);
-						$values = array_merge($values, $record[$field]->getFieldValues($keys) );
+						$values = array_merge($values, $record[$field]->getFieldValues($keys,$condition) );
 					}
 
 				// Is this an array of images/attachments?
