@@ -216,6 +216,26 @@ class AirpressVirtualPosts {
 		}
 	}
 
+	public function pre_get_document_title_filter($title){
+		global $wp_query;
+		return $wp_query->post->post_title;
+	}
+
+	public function the_title_filter($title,$id = null){
+		global $wp_query;
+
+		if ( isset( $this->config["template"] ) && $this->config["template"] == $id ){
+			return $wp_query->post->post_title;
+		} else {
+			return $title;
+		}
+
+	}
+
+	public function wpseo_title($title){
+		global $wp_query;
+		return $wp_query->post->post_title;
+	}
 
 	public function check_for_virtual_page(){
 		global $wp, $wp_query;
@@ -277,7 +297,14 @@ class AirpressVirtualPosts {
 					if ( $title_field ){
 						if ( isset( $this->AirpressCollection[0][$title_field] ) ){
 							airpress_debug("$title_field exists so post_title is ".$this->AirpressCollection[0][$title_field].".");
+							add_filter("wpseo_og_og_title",[$this,"wpseo_title"]);
+							add_filter("wpseo_twitter_title",[$this,"wpseo_title"]);
 							$wp_query->post->post_title = $this->AirpressCollection[0][$title_field];
+							if ( current_theme_supports( 'title-tag' ) ){
+								add_filter("pre_get_document_title",[$this,"pre_get_document_title_filter"],20);
+							} else {
+								add_filter("the_title",[$this,"the_title_filter"], 10, 2);
+							}
 						} else {
 
 							$post_title = $title_field;
