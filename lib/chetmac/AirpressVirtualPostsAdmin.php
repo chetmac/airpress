@@ -16,7 +16,7 @@ add_action( 'admin_menu', 'airpress_vp_menu' );
 
 add_action( 'init', "airpress_vp_add_rules" );
 
-airpress_debug(0,"These are all teh hooks",$wp_filter);
+// airpress_debug(0,"These are all teh hooks",$wp_filter);
 
 //add_action('rewrite_rules_array','airpress_vp_update_permalinks');
 //permalink_structure_changed
