@@ -418,8 +418,8 @@ class AirpressQuery {
 		}
 		if (isset($error["message"])){
 			$this->errors[] = $error;
-		} else if (is_array($error)){
-			$this->errors = array_merge($this->errors,$errors);
+		// } else if (is_array($error)){
+		// 	$this->errors = array_merge($this->errors,$errors);
 		} else {
 			$this->errors[] = $error;
 		}

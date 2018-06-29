@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.9.4
-Stable tag: 1.1.44
+Stable tag: 1.1.46
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,12 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.46 =
+* added $query->hasErrors() and $query->getErrors() so that in critical syncing applications your code can detect and handle any non "200" HTTP response
+
+= 1.1.45 =
+* Support the new(ish) title-tag enabled themes
 
 = 1.1.44 =
 * Bug fix
@@ -331,6 +337,32 @@ The name you give the connection is how you'll refer to this Connection from oth
 $query = new AirpressQuery();
 $query->setConfig("default");
 $query->table("My Airtable table name");
+?>
+`
+
+== Error Handling ==
+
+Since version 1.1.46 the AirpressQuery has the hasErrors() and getErrors() methods that should be used when doing any syncing operations as Airtable doesn't have a perfect 'uptime' record and you don't want to sync empty results just because your request either timed out or return a 422 error or something.
+
+`
+<?php
+$query = new AirpressQuery("My Table Name",0);
+$records = new AirpressCollection($query);
+
+if ( $query->hasErrors() ){
+	print_r($query->getErrors());
+	print_r($query->toString());
+
+	// or
+
+	$code = $errors[0]["code"];
+	$message = $errors[0]["message"];
+	$string = $query->toString();
+} else if ( is_airpress_empty($records) ) {
+	// Query was fine, just returned no results
+} else {
+	// Do something with $records
+}
 ?>
 `
 

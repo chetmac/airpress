@@ -48,18 +48,25 @@ class AirpressConnect{
 			$response  		= wp_remote_get( $url, $args );
 			$response_code 	= wp_remote_retrieve_response_code( $response );
 
+			$header = $response['headers']; // array of http header lines
+  			$body = isset($response['body']) ? json_decode($response['body'],true) : [];
+
 			if ( is_wp_error( $response ) || $response_code != 200) {
 
 				$e = round(microtime(true) - $start,2);
 				airpress_debug($query->getConfig(),$response_code." | ".$query->toString()." ($e)",array($http_params,$response));
 
+				if ( isset($body["error"]["message"]) ){
+					$message = $body["error"]["message"];
+				} else {
+					$message = "Not specified";
+				}
+
+				$query->logError(["code" => $response_code, "message" => $message]);
 				// Log error. wp_error?
 				return false;
 				
 			} else {
-
-				$header = $response['headers']; // array of http header lines
-  				$body = json_decode($response['body'],true); // use the content
 
 				// When getting a table, we'll build an array of records,
 				// when getting a record, we'll just return the record.
