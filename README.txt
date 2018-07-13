@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.9.4
-Stable tag: 1.1.46
+Stable tag: 1.1.48
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,12 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.48 =
+* Trigger airpress_virtualpost_setup action even when post->AirpressCollection is empty. Enables complete override of empty or failed Collections/queries.
+
+= 1.1.47 =
+* Title bugfix for VirtualPosts
 
 = 1.1.46 =
 * added $query->hasErrors() and $query->getErrors() so that in critical syncing applications your code can detect and handle any non "200" HTTP response
