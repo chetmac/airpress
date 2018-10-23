@@ -20,9 +20,9 @@ class AirpressVirtualFields{
 		if ( ! empty($configs) ){
     		add_filter('template_redirect', array($this,"airtable_lookup"), 1);
 
-    		if ( function_exists("is_cornerstone") && is_cornerstone() == "render" ){
-    			add_filter('the_post', array($this,"last_chance_for_data"));
-    		}
+    		// if ( function_exists("is_cornerstone") && is_cornerstone() == "render" ){
+    		// 	add_filter('the_post', array($this,"last_chance_for_data"));
+    		// }
 		}
 
 	}
