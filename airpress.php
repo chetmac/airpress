@@ -44,6 +44,20 @@ if (!isset($parsedown)){
 add_action( 'wp_ajax_nopriv_airpress_deferred', 'airpress_execute_deferred_queries' );
 add_action( 'wp_ajax_airpress_deferred', 'airpress_execute_deferred_queries' );
 
+function airpress_get_current_record(){
+	global $airpress, $post;
+
+	if ( is_airpress_collection($post->AirpressCollection) ){
+
+		if ( ! empty($airpress->loopscope) ){
+			return $airpress->loopscope[0];
+		} else {
+			return $post->AirpressCollection[0];
+		}
+
+	}
+
+}
 
 function airpress_execute_deferred_queries() {
 	global $airpress;
@@ -182,6 +196,72 @@ function airpress_getArrayValues($array,$keys){
 		}
 	}
 	return $array;
+}
+
+function airpress_parse_template($template, $record, $replacementFields=null){
+
+	if ( is_null($replacementFields) ){
+	    preg_match_all("/{{([^}]*)}}/", $template, $matches);
+
+	    $replacementFields = array_unique($matches[1]);
+	}
+
+	foreach($replacementFields as $replacementField){
+
+		$keys = explode("|", $replacementField);
+		$field = array_shift($keys);
+		$replacementValue = "";
+		
+		if ( strtolower($field) == "record_id" ){
+			if ( is_airpress_record($record)){
+				$replacementValue = $record->record_id();
+			} else {
+				airpress_debug(0,"Attempting to populate field $field on a non-populated record",$keys);
+			}
+		} else if ( ! is_airpress_empty( $record[$field] ) ){ 
+			// this means it IS an AirpressCollection with records
+
+			if (empty($keys)){
+				// this shouldn't really happen because we can't output a collection
+				// we should be looking INSIDE the collection, but can't since keys is empty
+			} else {
+				$replacementValue = implode(", ", $record[$field]->getFieldValues($keys) );
+			}
+
+		// This field is an array
+		} else if (is_array($record[$field]) ){
+
+			if (empty($keys)){
+				$replacementValue = implode(", ",$record[$field]);
+			} else {
+				$array = $record[$field];
+				while (!empty($keys)){
+					$key = array_shift($keys);
+					$array = $array[$key];
+				}
+				if (is_array($array)){
+					$replacementValue = implode(", ",$array);
+				} else {
+					$replacementValue = $array;
+				}
+			}
+
+		} else if (isset($record[$field])){
+
+			$replacementValue = $record[$field];
+
+		} else {
+
+			$replacementValue = "";
+
+		}
+
+		$template = str_replace("{{".$replacementField."}}", $replacementValue, $template);
+
+	}
+
+	return $template;
+
 }
 
 function airpress_flush_cache($all=false){

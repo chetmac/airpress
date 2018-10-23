@@ -124,6 +124,7 @@ function airpress_admin_vp_tab($key,$config) {
 		"formula"		=> "{Your Airtable Field} = '$1'",
 		"sort"			=> "",
 		"table"			=> "Your Airtable Table",
+		"view"			=> "Your Airtable Table View",
 		"field"			=> "Your Airtable Field",
 		"field2"		=> "Your Airtable Field2",
 		"template"		=> null,
@@ -190,6 +191,11 @@ function airpress_admin_vp_tab($key,$config) {
 	################################
 	$field_name = "table";
 	$field_title = "Airtable Table Name";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+
+	###############################
+	$field_name = "view";
+	$field_title = "Airtable Table View Name";
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	###############################

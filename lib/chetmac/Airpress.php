@@ -99,61 +99,8 @@ class Airpress {
 	    	// if we don't do this all {{variables}} will be replaced by outter most loops.
 	    	$template = do_shortcode($content);
 
-	    	foreach($replacementFields as $replacementField){
+	    	$output .= airpress_parse_template($template, $record, $replacementFields);
 
-	    		$keys = explode("|", $replacementField);
-	    		$field = array_shift($keys);
-				$replacementValue = "";
-				
-				if ( strtolower($field) == "record_id" ){
-					if ( is_airpress_record($record)){
-						$replacementValue = $record->record_id();
-					} else {
-						airpress_debug(0,"Attempting to populate field $field on a non-populated record",$keys);
-					}
-				} else if ( ! is_airpress_empty( $record[$field] ) ){ 
-					// this means it IS an AirpressCollection with records
-
-	    			if (empty($keys)){
-	    				// this shouldn't really happen because we can't output a collection
-	    				// we should be looking INSIDE the collection, but can't since keys is empty
-	    			} else {
-	    				$replacementValue = implode(", ", $record[$field]->getFieldValues($keys) );
-	    			}
-
-	    		// This field is an array
-	    		} else if (is_array($record[$field]) ){
-
-	    			if (empty($keys)){
-	    				$replacementValue = implode(", ",$record[$field]);
-	    			} else {
-	    				$array = $record[$field];
-	    				while (!empty($keys)){
-	    					$key = array_shift($keys);
-	    					$array = $array[$key];
-	    				}
-	    				if (is_array($array)){
-	    					$replacementValue = implode(", ",$array);
-	    				} else {
-	    					$replacementValue = $array;
-	    				}
-	    			}
-
-	    		} else if (isset($record[$field])){
-
-	    			$replacementValue = $record[$field];
-
-	    		} else {
-
-	    			$replacementValue = "";
-
-	    		}
-
-    			$template = str_replace("{{".$replacementField."}}", $replacementValue, $template);
-
-	    	}
-
-	    	$output .= $template;
 	    	// Take current record back off scope stack
 	    	array_shift($this->loopScope);
 	    }
@@ -319,7 +266,9 @@ class Airpress {
 
 			if ( $condition_match ):
 
-	   			if ( is_string($this->loopScope[$scope][$field]) ){
+				if ( $field == "record_id" ){
+					$values = array($this->loopScope[$scope]->record_id());
+				} else if ( is_string($this->loopScope[$scope][$field]) ){
 
 					if ( $condition ){
 						list($condition_field,$condition_value) = explode("|",$condition);

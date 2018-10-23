@@ -133,6 +133,10 @@ class AirpressVirtualPosts {
 
 			$query->table($this->config["table"]);
 			
+			if ( ! empty($this->config["view"]) ){
+				$query->view($this->config["view"]);				
+			}
+
 			// Process formula to inject any vars
 			$formula = $this->config["formula"];
 			$i = 1;
