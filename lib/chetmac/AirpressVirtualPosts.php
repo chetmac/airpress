@@ -133,6 +133,10 @@ class AirpressVirtualPosts {
 
 			$query->table($this->config["table"]);
 			
+			if ( ! empty($this->config["view"]) ){
+				$query->view($this->config["view"]);				
+			}
+
 			// Process formula to inject any vars
 			$formula = $this->config["formula"];
 			$i = 1;
@@ -187,8 +191,8 @@ class AirpressVirtualPosts {
 
 	public function last_chance_for_data($post){
 		global $wp,$wp_query;
-
-		if ( ! $this->config && function_exists("is_cornerstone") && is_cornerstone() == "render"){
+		
+		if ( ! $this->config && is_airpress_compatible_page_builder() == "render" ){
 
 			$configs = get_airpress_configs("airpress_vp");
 

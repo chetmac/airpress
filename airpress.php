@@ -262,7 +262,15 @@ function airpress_debug($cx=0,$message=null,$object=null){
 	
 }
 
-function is_cornerstone(){
+// Look at me being backwards compatible while 
+// working towards using namespaced functions.
+if ( ! function_exists("is_cornerstone") ){
+	function is_cornerstone(){
+		return is_airpress_cornerstone();
+	}
+}
+
+function is_airpress_cornerstone(){
 	if (isset($_GET["action"]) && $_GET["action"] == "cs_render_element"){
 		// Cornerstone Element Render
 		return "render";
@@ -272,9 +280,32 @@ function is_cornerstone(){
 	} else if (isset($_GET["cornerstone"])){
 		// Cornerstone Admin
 		return "admin";
-	} else {
-		return false;
 	}
+
+	return false;
+}
+
+function is_airpress_elementor(){
+	if (isset($_POST["action"]) && $_POST["action"] == "elementor_ajax"){
+		// elementor Element Render
+		return "render";
+	}
+
+	return false;
+}
+
+function is_airpress_compatible_page_builder(){
+
+	if ( $mode = is_airpress_cornerstone() ){
+		return $mode;
+	}
+
+	if ( $mode = is_airpress_elementor() ){
+		return $mode;
+	}
+	
+	return false;
+
 }
 
 /*
