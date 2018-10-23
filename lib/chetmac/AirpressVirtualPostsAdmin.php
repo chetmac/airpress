@@ -124,7 +124,7 @@ function airpress_admin_vp_tab($key,$config) {
 		"formula"		=> "{Your Airtable Field} = '$1'",
 		"sort"			=> "",
 		"table"			=> "Your Airtable Table",
-		"view"			=> "Your Airtable Table View",
+		"view"			=> "",
 		"field"			=> "Your Airtable Field",
 		"field2"		=> "Your Airtable Field2",
 		"template"		=> null,

@@ -251,7 +251,7 @@ class AirpressVirtualPosts {
 			if ($this->config["requested_post"] == false){
 
 				// if this virtual post returned data from Airtable, set it up
-				if ($this->AirpressCollection){
+				if ( ! is_airpress_empty($this->AirpressCollection) ){
 
 					// A virtual page requires an actual page to use as a template
 					// Consider if this template is named "My Template", it will have
