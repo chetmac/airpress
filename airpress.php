@@ -14,6 +14,45 @@ if ( ! defined( 'WPINC' ) ) {
 	 die;
 }
 
+// Create a helper function for easy SDK access.
+function air_fs() {
+    global $air_fs;
+
+    if ( ! isset( $air_fs ) ) {
+        // Include Freemius SDK.
+        require_once dirname(__FILE__) . '/freemius/start.php';
+
+        $air_fs = fs_dynamic_init( array(
+            'id'                  => '2758',
+            'slug'                => 'airpress',
+            'type'                => 'plugin',
+            'public_key'          => 'pk_67f31e3d8769bc7d4e1cacda132d4',
+            'is_premium'          => true,
+            // If your plugin is a serviceware, set this option to false.
+            'has_premium_version' => true,
+            'has_addons'          => false,
+            'has_paid_plans'      => true,
+            'trial'               => array(
+                'days'               => 7,
+                'is_require_payment' => false,
+            ),
+            'menu'                => array(
+                'slug'           => 'airpress_cx',
+            ),
+            // Set the SDK to work in a sandbox mode (for development & testing).
+            // IMPORTANT: MAKE SURE TO REMOVE SECRET KEY BEFORE DEPLOYMENT.
+            'secret_key'          => 'sk_9RWlBt!s$tDYxG+0IXbpSkaH:Gqy;',
+        ) );
+    }
+
+    return $air_fs;
+}
+
+// Init Freemius.
+air_fs();
+// Signal that SDK was initiated.
+do_action( 'air_fs_loaded' );
+
 require_once("lib/chetmac/Airpress.php");
 require_once("lib/chetmac/AirpressConnect.php");
 require_once("lib/chetmac/AirpressQuery.php");
