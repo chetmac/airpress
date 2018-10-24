@@ -11,6 +11,10 @@ class AirpressQuery {
 
 	private $errors;
 
+	public function toArray(){
+		return [];
+	}
+
 	public function __construct($table=null,$config=null,$params=array()){
 		global $airpress;
 

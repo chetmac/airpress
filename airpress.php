@@ -310,10 +310,14 @@ function airpress_debug($cx=0,$message=null,$object=null){
 
 		if ( $config["debug"] == 1 || $config["debug"] == 2 ){
 
+			$object_string = print_r($object,true);
+			$object_string = str_replace(substr($config["api_key"],3,-3),"*******",$object_string);
+			$object_string = str_replace(substr($config["app_id"],3,-3),"*******",$object_string);
+
 			if ( $h = @fopen($config["log"], "a") ){
 				fwrite($h, $message."\n");
 				if (isset($object)){
-					fwrite($h, "#########################################\n".print_r($object,true)."\n#########################################\n\n");
+					fwrite($h, "#########################################\n".$object_string."\n#########################################\n\n");
 				}
 				fclose($h);
 			}
@@ -328,7 +332,7 @@ function airpress_debug($cx=0,$message=null,$object=null){
 				// $expanded = ob_get_clean();;
 
 				$airpress->debug_output .= "+ <a class='expander' href='#'>$message</a>";
-				$airpress->debug_output .= "<div class='expandable'>".print_r($object,true)."</div>";
+				$airpress->debug_output .= "<div class='expandable'>".print_r($object_string,true)."</div>";
 				//$airpress->debug_output .= "<div class='expandable'>$expanded</div>";
 			} else {
 				$airpress->debug_output .= $message;
