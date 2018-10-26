@@ -189,6 +189,11 @@ function airpress_admin_vp_tab($key,$config) {
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################
+	$field_name = "sort_direction";
+	$field_title = "Sort direction";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_select__direction', $option_name, $section_name, array($options,$option_name,$field_name) );
+
+	################################
 	$field_name = "table";
 	$field_title = "Airtable Table Name";
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_vp_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
@@ -371,6 +376,25 @@ function airpress_admin_vp_render_element_select__page($args) {
 		$selected = ($options[$field_name] == $page->ID)? " selected" : "";
 		$option = '<option value="' . $page->ID . '"'.$selected.'>';
 		$option .= $page->post_title." (".$page->post_name.")";
+		$option .= '</option>';
+		echo $option;
+	}
+	echo '</select>';
+}
+
+function airpress_admin_vp_render_element_select__direction($args) {
+	$options = $args[0];
+	$option_name = $args[1];
+	$field_name = $args[2];
+
+	$directions = array(["value" => "asc","label" => "Ascending (A-Z)"],["value" => "desc","label" => "Descending (Z-A)"]);
+	
+	echo '<select id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']">';
+
+	foreach ( $directions as $d ) {
+		$selected = ($options[$field_name] == $d["value"])? " selected" : "";
+		$option = '<option value="' . $d["value"] . '"'.$selected.'>';
+		$option .= $d["label"];
 		$option .= '</option>';
 		echo $option;
 	}

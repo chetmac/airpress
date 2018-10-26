@@ -176,7 +176,8 @@ function airpress_admin_cx_tab($key,$config) {
 			"api_url" => "https://api.airtable.com/v0/",
 			"fresh"  => "fresh",
 			"debug"	=> 0,
-			"log"	=> dirname(dirname(dirname(__FILE__)))."/airpress.log"
+			"log"	=> dirname(dirname(dirname(__FILE__)))."/airpress.log",
+			"log_max_size"	=> 3072
 		);
 
 	$options = array_merge($defaults,$config);
@@ -250,6 +251,11 @@ function airpress_admin_cx_tab($key,$config) {
 	$field_title = "Debug Logfile";
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_cx_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
+	################################
+	$field_name = "log_max_size";
+	$field_title = "Logfile Max Size in Kilobytes (0 for unlimited)";
+	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_cx_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+
 	###############################
 	$field_name = "delete";
 	$field_title = "Delete Configuration?";
@@ -271,6 +277,39 @@ function airpress_cx_validation($input){
 			$input["debug"] = 0;
 			add_settings_error('airpress_cx_log', esc_attr( 'settings_updated' ), esc_attr($input["log"])." is not writable.","error");
 		}
+
+	} else {
+
+		$manual_intervention = false;
+
+		if ( file_exists($input["log"]) ){
+
+			$manual_intervention = true;
+
+			if ( is_writable($input["log"]) ){
+
+				$parts = pathinfo($input["log"]);
+
+				// Let's only delete log files named airpress.log to avoid allowing
+				// this field to control the deletion of any file on the server
+				if ( $parts["filename"] == "airpress.log" ){
+
+					unlink($input["log"]);
+					$manual_intervention = false;
+
+				}
+
+			} else {
+
+				add_settings_error('airpress_cx_log', esc_attr( 'settings_updated' ), "Failed to delete log file. Please manually delete.","error");
+
+			}
+
+		}
+
+		// if ( $manual_intervention ){
+		// 	add_settings_error('airpress_cx_log', esc_attr( 'settings_updated' ), "Please delete the log file at " . esc_attr($input["log"]),"error");
+		// }
 
 	}
 

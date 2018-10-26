@@ -151,7 +151,7 @@ class AirpressVirtualPosts {
 
 			// Handle sort parameter
 			if (isset($this->config["sort"]) && !empty($this->config["sort"])){
-				$query->sort($this->config["sort"]);
+				$query->sort($this->config["sort"],$this->config["sort_direction"]);
 			}
 
 			if ( $simulation ){
