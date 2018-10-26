@@ -245,10 +245,10 @@ function airpress_admin_cx_tab($key,$config) {
 	$field_title = "Debug Logfile";
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_cx_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
-	################################
-	$field_name = "log_max_size";
-	$field_title = "Logfile Max Size in Kilobytes (0 for unlimited)";
-	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_cx_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
+	// ################################
+	// $field_name = "log_max_size";
+	// $field_title = "Logfile Max Size in Kilobytes (0 for unlimited)";
+	// add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_cx_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	###############################
 	$field_name = "delete";
