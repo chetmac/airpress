@@ -3,7 +3,7 @@
 Plugin Name: Airpress
 Plugin URI: http://chetmac.com/airpress
 Description: Extend Wordpress Posts, Pages, and Custom Fields with data from remote Airtable records.
-Version: 1.1.48
+Version: 1.1.49
 Author: Chester McLaughlin
 Author URI: http://chetmac.com
 License: GPLv2 or later
@@ -27,21 +27,13 @@ function air_fs() {
             'slug'                => 'airpress',
             'type'                => 'plugin',
             'public_key'          => 'pk_67f31e3d8769bc7d4e1cacda132d4',
-            'is_premium'          => true,
-            // If your plugin is a serviceware, set this option to false.
-            'has_premium_version' => true,
+            'is_premium'          => false,
             'has_addons'          => false,
-            'has_paid_plans'      => true,
-            'trial'               => array(
-                'days'               => 7,
-                'is_require_payment' => false,
-            ),
+            'has_paid_plans'      => false,
             'menu'                => array(
-                'slug'           => 'airpress_cx',
+                'slug'           => 'airpress_settings',
+                'first-path'     => 'admin.php?page=airpress_cx',
             ),
-            // Set the SDK to work in a sandbox mode (for development & testing).
-            // IMPORTANT: MAKE SURE TO REMOVE SECRET KEY BEFORE DEPLOYMENT.
-            'secret_key'          => 'sk_9RWlBt!s$tDYxG+0IXbpSkaH:Gqy;',
         ) );
     }
 
@@ -52,6 +44,27 @@ function air_fs() {
 air_fs();
 // Signal that SDK was initiated.
 do_action( 'air_fs_loaded' );
+
+function air_fs_custom_connect_message_on_update(
+    $message,
+    $user_first_name,
+    $plugin_title,
+    $user_login,
+    $site_link,
+    $freemius_link
+) {
+    return sprintf(
+        __( 'Hey %1$s' ) . ',<br>' .
+        __( 'I\'m so pleased you\'re using %2$s! Please help me improve it! If you opt-in, some data about your usage of %2$s will be sent to %5$s. If you skip this, that\'s okay! %2$s will still work just fine.', 'airpress' ),
+        $user_first_name,
+        '<b>' . $plugin_title . '</b>',
+        '<b>' . $user_login . '</b>',
+        $site_link,
+        $freemius_link
+    );
+}
+
+air_fs()->add_filter('connect_message_on_update', 'air_fs_custom_connect_message_on_update', 10, 6);
 
 require_once("lib/chetmac/Airpress.php");
 require_once("lib/chetmac/AirpressConnect.php");

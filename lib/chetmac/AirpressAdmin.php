@@ -34,6 +34,10 @@ function airpress_cx_menu() {
 }
 add_action( 'admin_menu', 'airpress_cx_menu' );
 
+function airpress_admin_render(){
+	return "<div class='wrap'>what goes here?</div>";
+}
+
 function airpress_db_render( $active_tab = '' ) {
 	global $wpdb;
 
@@ -215,16 +219,6 @@ function airpress_admin_cx_tab($key,$config) {
 	add_settings_field(	$field_name, __( $field_title, 'airpress' ), 'airpress_admin_cx_render_element_text', $option_name, $section_name, array($options,$option_name,$field_name) );
 
 	################################
-	################################
-	$section_title = "Request Caching";
-	$section_name = "airpress_cx".$key;
-
-	add_settings_section(
-		$section_name,
-		__( $section_title, 'airpress' ),
-		"airpress_admin_cx_render_section",
-		$option_name
-	);
 
 	################################
 	$field_name = "refresh";
@@ -331,6 +325,10 @@ function airpress_admin_cx_render_element_text($args) {
 	$field_name = $args[2];
 
 	echo '<input type="text" id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']" value="' . $options[$field_name] . '" />';
+
+	if ( $field_name == "name" and $options[$field_name] == "New Configuration" ){
+		echo "<p style='color:red'>You must change the configuration name from 'New Configuration' to something unique!</p>";
+	}
 }
 
 function airpress_admin_cx_render_element_toggle($args) {

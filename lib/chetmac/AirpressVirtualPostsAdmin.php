@@ -281,6 +281,10 @@ function airpress_admin_vp_render_element_text($args) {
 	$field_name = $args[2];
 
 	echo '<input type="text" id="' . $field_name . '" name="' . $option_name . '[' . $field_name . ']" value="' . $options[$field_name] . '" />';
+
+	if ( $field_name == "name" and $options[$field_name] == "New Configuration" ){
+		echo "<p style='color:red'>You must change the configuration name from 'New Configuration' to something unique!</p>";
+	}
 }
 
 function airpress_admin_vp_render_element_regex($args) {
