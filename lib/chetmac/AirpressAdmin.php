@@ -260,7 +260,7 @@ function airpress_admin_cx_tab($key,$config) {
 
 function airpress_cx_validation($input){
 	global $wp_rewrite;
-
+	
 	if ($input["debug"] == 1 || $input["debug"] == 2){
 
 		if ( $h = @fopen($input["log"], "a") ){
@@ -282,28 +282,37 @@ function airpress_cx_validation($input){
 
 			if ( is_writable($input["log"]) ){
 
+				if ( $h = @fopen($input["log"], "w") ){
+					$message = "attempting to delete ".$input["log"];
+					fwrite($h, $message."\n");
+					fclose($h);
+				}
+
 				$parts = pathinfo($input["log"]);
 
 				// Let's only delete log files named airpress.log to avoid allowing
 				// this field to control the deletion of any file on the server
-				if ( $parts["filename"] == "airpress.log" ){
+				if ( $parts["basename"] == "airpress.log" ){
 
-					unlink($input["log"]);
-					$manual_intervention = false;
+					if ( unlink($input["log"]) ){
+						$manual_intervention = false;
+					} else {
+						if ( $h = @fopen($input["log"], "a") ){
+							$message = "failed to delete ".$input["log"];
+							fwrite($h, $message."\n");
+							fclose($h);
+						}
+					}
 
 				}
-
-			} else {
-
-				add_settings_error('airpress_cx_log', esc_attr( 'settings_updated' ), "Failed to delete log file. Please manually delete.","error");
 
 			}
 
 		}
 
-		// if ( $manual_intervention ){
-		// 	add_settings_error('airpress_cx_log', esc_attr( 'settings_updated' ), "Please delete the log file at " . esc_attr($input["log"]),"error");
-		// }
+		if ( $manual_intervention ){
+			add_settings_error('airpress_cx_log', esc_attr( 'settings_updated' ), "Please delete the log file at " . esc_attr($input["log"]),"error");
+		}
 
 	}
 

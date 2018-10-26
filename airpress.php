@@ -10,6 +10,8 @@ License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
+$airpress_version = "1.1.49";
+
 if ( ! defined( 'WPINC' ) ) {
 	 die;
 }
@@ -82,6 +84,10 @@ if (is_admin()){
 
 $airpress = new Airpress();
 add_action( 'plugins_loaded', array($airpress,'init') );
+
+if ( is_admin()){
+	add_action( 'plugins_loaded', array($airpress,"check_for_update") );
+}
 
 if ( ! class_exists("Parsedown")){
 	require_once("lib/erusev/Parsedown.php");

@@ -45,6 +45,20 @@ class Airpress {
 		$this->loopScope = array();
 	}
 
+	public function check_for_update(){
+		global $airpress_version;
+	    if ( get_option( 'airpress_version' ) != $airpress_version) {
+	        
+	    	// truncate log files
+	    	if ( $airpress_version == "1.1.49" ){
+	    		$this->truncate_log_files();
+	    	}
+
+	    	update_option("airpress_version", $airpress_version, false);
+
+	    }
+	}
+
 	public function simulateVirtualPost($request){
 		airpress_debug(0,"Simulating Virtual Post",$request);
 		$this->virtualPosts->check_for_actual_page( $request, true);
@@ -436,6 +450,24 @@ class Airpress {
 			}
 		}
 
+	}
+
+	public function truncate_log_files(){
+		$connections = get_airpress_configs("airpress_cx");
+
+		foreach($connections as $config){
+
+			if ( file_exists($config["log"]) && is_writable($config["log"]) ){
+
+				$parts = pathinfo($config["log"]);
+
+				if ( $parts["basename"] == "airpress.log" && $h = @fopen($config["log"], "w") ){
+					fclose($h);
+				}
+
+			}
+
+		}
 	}
 
 	function debug(){
