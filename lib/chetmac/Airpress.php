@@ -457,7 +457,7 @@ class Airpress {
 
 		foreach($connections as $config){
 
-			if ( file_exists($config["log"]) && is_writable($config["log"]) ){
+			if ( ! empty($config["log"]) && file_exists($config["log"]) && is_writable($config["log"]) ){
 
 				$parts = pathinfo($config["log"]);
 
