@@ -4,7 +4,7 @@ Donate link: https://www.paypal.me/chetmac
 Tags: airtable, custom, custom field, data management, repeater, spreadsheet, remote data, api
 Requires at least: 4.6
 Tested up to: 4.9.8
-Stable tag: 1.1.53
+Stable tag: 1.1.54
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -63,6 +63,9 @@ No. Airpress uses the same technique as WP Cron to refresh cached data in the ba
 7. Visit http://airtable.com/api to get your API Key and APP ID.
 
 == Changelog ==
+
+= 1.1.54 =
+* Added default value option: [apr field="Field Name" default="Sorry... no value found so you'll see this!"]
 
 = 1.1.53 =
 * Added (much) better error reporting in the VirtualPost config screen. Don't forget you can always enable the debugger to get even more debugging data.
