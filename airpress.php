@@ -3,7 +3,7 @@
 Plugin Name: Airpress
 Plugin URI: http://chetmac.com/airpress
 Description: Extend Wordpress Posts, Pages, and Custom Fields with data from remote Airtable records.
-Version: 1.1.49
+Version: 1.1.52
 Author: Chester McLaughlin
 Author URI: http://chetmac.com
 License: GPLv2 or later
@@ -25,10 +25,10 @@ function air_fs() {
         require_once dirname(__FILE__) . '/freemius/start.php';
 
         $air_fs = fs_dynamic_init( array(
-            'id'                  => '2758',
+            'id'                  => '2775',
             'slug'                => 'airpress',
             'type'                => 'plugin',
-            'public_key'          => 'pk_67f31e3d8769bc7d4e1cacda132d4',
+            'public_key'          => 'pk_366237d3b7511bd7494423c0df287',
             'is_premium'          => false,
             'has_addons'          => false,
             'has_paid_plans'      => false,
