@@ -50,7 +50,7 @@ class Airpress {
 	    if ( get_option( 'airpress_version' ) != $airpress_version) {
 	        
 	    	// truncate log files
-	    	if ( $airpress_version == "1.1.49" ){
+	    	if ( $airpress_version == "1.1.53" ){
 	    		$this->truncate_log_files();
 	    	}
 
@@ -59,9 +59,12 @@ class Airpress {
 	    }
 	}
 
-	public function simulateVirtualPost($request){
+	public function simulateVirtualPost($request,$query = null){
 		airpress_debug(0,"Simulating Virtual Post",$request);
-		$this->virtualPosts->check_for_actual_page( $request, true);
+		if ( is_null($query) ){
+			$query = new AirpressQuery();
+		}
+		$this->virtualPosts->check_for_actual_page( $request, true, $query);
 		airpress_debug(0,"Simulated Virtual Post Collection",$this->virtualPosts->AirpressCollection);
 		return $this->virtualPosts->AirpressCollection;
 	}
@@ -242,7 +245,7 @@ class Airpress {
 			'single'			=> null,
 			'rollup'			=> null,
 			'condition'			=> null,
-			'default'			=> null,
+			'default'			=> "",
 			'format'			=> null,
 			'loopscope'			=> null,
 			'glue'				=> "\n",
@@ -342,7 +345,7 @@ class Airpress {
 
 		}
 
-		$output = "";
+		$output = $a["default"];
 
 		if ( ! is_null($values) ){
 

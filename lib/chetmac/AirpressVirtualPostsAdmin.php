@@ -316,12 +316,19 @@ function airpress_admin_vp_render_element_test($args) {
 		$request = new StdClass();
 		$request->request = trim($options["default"],"/")."/";
 		$request->matched_rule = $options["pattern"];
-		$collection = $airpress->simulateVirtualPost($request);
+		$query = new AirpressQuery();
+		$collection = $airpress->simulateVirtualPost($request,$query);
 
 		if ( is_airpress_collection($collection) ){
 			echo "<br>This test URL matches ".count($collection)." records in table <em>".$options["table"]."</em>";
 		} else {
-			echo "<br>No results from test url.";
+			echo "<br>No results from test url.<br>";
+			if ( $query->hasErrors() ){
+				echo "ERRORS:<br>";
+				foreach( $query->getErrors() as $error ){
+					echo "<strong style='color:red'>{$error['code']}</strong>: {$error['message']}<br>";
+				}
+			}
 		}
 
 	}

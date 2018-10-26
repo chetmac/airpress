@@ -58,7 +58,7 @@ class AirpressVirtualPosts {
 	If one of our redirect rules matched, we want to check to see if it WOULD HAVE matched
 	an actual wordpress post/page
 	*/
-	public function check_for_actual_page( $request, $simulation=false ) {
+	public function check_for_actual_page( $request, $simulation=false, $query = null ) {
 
 		if (isset($request->matched_rule)){
 
@@ -127,7 +127,9 @@ class AirpressVirtualPosts {
 			$connection = get_airpress_config("airpress_cx",$this->config["connection"]);
 
 			// We've matched a config. Let's check and see if a cooresponding record exists
-			$query = new AirpressQuery();
+			if ( is_null($query) ){
+				$query = new AirpressQuery();
+			}
 
 			$query->setConfig($connection);
 

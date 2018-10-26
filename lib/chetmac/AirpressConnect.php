@@ -48,13 +48,27 @@ class AirpressConnect{
 			$response  		= wp_remote_get( $url, $args );
 			$response_code 	= wp_remote_retrieve_response_code( $response );
 
-			if ( is_wp_error( $response ) || $response_code != 200) {
+			if ( is_wp_error( $response ) ){
+
+				$e = round(microtime(true) - $start,2);
+				
+				airpress_debug($query->getConfig(),"WP Error | ".$query->toString()." ($e)",array($http_params,$response));
+
+				foreach( $response->errors as $code => $error ){
+					$query->logError(["code" => $code, "message" => implode(" | ", $error) ]);
+				}
+
+				return false;
+
+			} else if ( $response_code != 200 ) {
 
 				$e = round(microtime(true) - $start,2);
 				airpress_debug($query->getConfig(),$response_code." | ".$query->toString()." ($e)",array($http_params,$response));
 
-				if ( isset($response['body']["error"]["message"]) ){
-					$message = $response['body']["error"]["message"];
+				$body = isset($response['body']) ? json_decode($response['body'],true) : [];
+
+				if ( isset($body["error"]["message"]) ){
+					$message = $body["error"]["message"];
 				} else {
 					$message = "Not specified";
 				}
