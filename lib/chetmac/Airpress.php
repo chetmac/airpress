@@ -50,7 +50,7 @@ class Airpress {
 	    if ( get_option( 'airpress_version' ) != $airpress_version) {
 	        
 	    	// truncate log files
-	    	if ( $airpress_version == "1.1.54" ){
+	    	if ( $airpress_version == "1.1.55" ){
 	    		$this->truncate_log_files();
 	    	}
 
@@ -345,7 +345,7 @@ class Airpress {
 
 		}
 
-		$output = $a["default"];
+		$output = sprintf($a["wrapper"],$a["default"]);
 
 		if ( ! is_null($values) && ! empty($values) ){
 
